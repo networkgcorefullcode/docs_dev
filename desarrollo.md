@@ -8,6 +8,7 @@
 
 - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
 - [Entorno de docker](#entorno-de-docker)
+- [Comandos Utiles](#comandos-utiles)
 ---
 
 ### Pasos iniciales
@@ -259,3 +260,25 @@ docker compose up -d
 ```
 
 Hasta ahora todo es una prueba, la configuracion puede que no sea estable, por favor, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
+
+### Comandos Utiles
+- Para detener todos los contenedores:
+```bash
+docker compose down
+```
+- Para ver los logs de un contenedor específico:
+```bash
+docker compose logs <nombre_del_contenedor>
+``` 
+- Para ejecutar comandos dentro de un contenedor en ejecución:
+```bash
+docker exec -it <nombre_del_contenedor> <comando>
+```
+Por ejemplo, para abrir una terminal bash en el contenedor `amf`:
+```bash
+docker exec -it amf /bin/bash
+```
+- Para reconstruir los contenedores después de hacer cambios en el código:
+```bash
+docker compose up -d --build
+```
