@@ -1,4 +1,4 @@
-### Índice
+# Índice
 
 - [Pasos iniciales](#pasos-iniciales)
   - [Instalaciones necesarias](#instalaciones-necesarias)
@@ -9,13 +9,17 @@
 - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
 - [Entorno de docker](#entorno-de-docker)
 - [Comandos Utiles](#comandos-utiles)
+
 ---
 
-### Pasos iniciales
+## Pasos iniciales
+
 Objetivo: construir las imagenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno valido para el desarrollo. Hacer ese entorno utilizando solo docker. Luego hacerlo utilizando kubernetes y los helm charts ya creados por la comunidad de aether.
 
 ### Instalaciones necesarias
+
 Las instalaciones necesarias son las siguientes:
+
 - [Go](https://go.dev/doc/install)
 - [Docker](https://docs.docker.com/engine/install/ubuntu/)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
@@ -23,7 +27,9 @@ Las instalaciones necesarias son las siguientes:
 - Python version >= 3.8
 
 ### Clonar repositorios
+
 En nuestro entorno ejecutar los siguientes comandos:
+
 ```bash
 cd ~
 mkdir aether-forks
@@ -31,11 +37,13 @@ cd aether-forks
 ```
 
 Crear aqui el archivo `python_get_repos.py`:
+
 ```bash
 touch python_get_repos.py
 ```
 
 Copiar el siguiente código (Para clonar todos los repo rapidamente):
+
 ```python
 import requests
 import os
@@ -57,7 +65,9 @@ Después de que termine la ejecución del script tendremos las siguientes carpet
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
 ### Construir componentes
+
 Crear el script `build_components.sh`:
+
 ```bash
 touch build_components.sh
 sudo chmod 700 build_components.sh
@@ -77,12 +87,15 @@ done
 ```
 
 Ejecutar el script para crear los builds de cada componente:
+
 ```bash
 ./build_components.sh
 ```
 
 ### Obtener builds
+
 Crear el script `get_builds.sh`:
+
 ```bash
 touch get_builds.sh
 sudo chmod 700 get_builds.sh
@@ -105,6 +118,7 @@ for dir in "$current_dir"/* ; do
     fi
 done
 ```
+
 Este script copiara todos los builds de go en una carpeta llamada bin
 
 ```bash
@@ -115,7 +129,7 @@ Este script copiara todos los builds de go en una carpeta llamada bin
 
 Binario de cada uno de los componentes
 
-### Ejecutar componentes individualmente
+## Ejecutar componentes individualmente
 
 Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, podemos hacer lo siguiente:
 
@@ -135,7 +149,8 @@ Asi para cada uno de los componentes, que soporten una configuracion inicial a t
 
 Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es espcialmente útil para el desarrollo y la depuración de cada componente por separado.
 
-### Entorno de docker
+## Entorno de docker
+
 Para crear un entorno de desarrollo utilizando Docker, podemos utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
 
 ```yaml
@@ -261,24 +276,34 @@ docker compose up -d
 
 Hasta ahora todo es una prueba, la configuracion puede que no sea estable, por favor, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
 
-### Comandos Utiles
+## Comandos Utiles
+
 - Para detener todos los contenedores:
+
 ```bash
 docker compose down
 ```
+
 - Para ver los logs de un contenedor específico:
+
 ```bash
 docker compose logs <nombre_del_contenedor>
-``` 
+```
+
 - Para ejecutar comandos dentro de un contenedor en ejecución:
+
 ```bash
 docker exec -it <nombre_del_contenedor> <comando>
 ```
+
 Por ejemplo, para abrir una terminal bash en el contenedor `amf`:
+
 ```bash
 docker exec -it amf /bin/bash
 ```
+
 - Para reconstruir los contenedores después de hacer cambios en el código:
+
 ```bash
 docker compose up -d --build
 ```
