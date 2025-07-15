@@ -1,9 +1,4 @@
-#### Pasos iniciales
-Objetivo: construir las imagenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno valido para el desarrollo. Hacer ese entorno utilizando solo docker. Luego hacerlo utilizando kubernetes y los helm charts ya creados por la comunidad de aether.
-
-
-
-#### Índice
+### Índice
 
 - [Pasos iniciales](#pasos-iniciales)
   - [Instalaciones necesarias](#instalaciones-necesarias)
