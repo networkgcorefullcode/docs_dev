@@ -315,3 +315,25 @@ docker exec -it amf /bin/bash
 ```bash
 docker compose up -d --build
 ```
+
+Si necesitas instalar utilidades adicionales como `vim`, `strace`, `net-tools`, `curl`, `netcat-openbsd` y `bind-tools` en un contenedor basado en Alpine Linux, puedes ejecutar el siguiente comando dentro del contenedor:
+
+```bash
+apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools
+```
+
+Esto actualizará los índices de paquetes e instalará las herramientas necesarias sin guardar archivos temporales, manteniendo la imagen ligera.
+
+Script para instalar herramientas en los contenedores core 5G:
+
+```bash
+#!/bin/bash
+
+# Lista de contenedores core 5G según docker-compose
+core5g_containers=(amf ausf nrf nssf pcf smf udm udr)
+
+for c in "${core5g_containers[@]}"; do
+    echo "Instalando herramientas en $c..."
+    docker exec -it "$c" sh -c "apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools"
+done
+```
