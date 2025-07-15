@@ -165,6 +165,7 @@ services:
   amf:
     build: ./amf
     container_name: amf
+    command: ["/usr/local/bin/amf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/amfcfg.yaml:/app/config.yaml
     networks:
@@ -174,6 +175,7 @@ services:
   ausf:
     build: ./ausf
     container_name: ausf
+    command: ["/usr/local/bin/ausf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/ausfcfg.yaml:/app/config.yaml
     networks:
@@ -184,6 +186,7 @@ services:
   nrf:
     build: ./nrf
     container_name: nrf
+    command: ["/usr/local/bin/nrf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/nrfcfg.yaml:/app/config.yaml
     networks:
@@ -193,6 +196,7 @@ services:
   nssf:
     build: ./nssf
     container_name: nssf
+    command: ["/usr/local/bin/nssf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/test_nssf_config.yaml:/app/config.yaml
     networks:
@@ -202,6 +206,7 @@ services:
   pcf:
     build: ./pcf
     container_name: pcf
+    command: ["/usr/local/bin/pcf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/pcfcfg.yaml:/app/config.yaml
     networks:
@@ -211,6 +216,7 @@ services:
   smf:
     build: ./smf
     container_name: smf
+    command: ["/usr/local/bin/smf", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/smfcfg.yaml:/app/config.yaml
     networks:
@@ -220,6 +226,7 @@ services:
   udm:
     build: ./udm
     container_name: udm
+    command: ["/usr/local/bin/udm", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/udmcfg.yaml:/app/config.yaml
     networks:
@@ -229,6 +236,7 @@ services:
   udr:
     build: ./udr
     container_name: udr
+    command: ["/usr/local/bin/udr", "--cfg", "/app/config.yaml"]
     volumes:
       - ./configs_files/docker_compose_config/udr_config.yaml:/app/config.yaml
     networks:
