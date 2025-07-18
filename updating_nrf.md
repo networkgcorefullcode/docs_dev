@@ -97,7 +97,7 @@ Con este cliente generado, se pueden realizar pruebas y desarrollos sobre el NRF
 
 Ahora iremos paso a paso acutualizando el codigo del repo openapi y el repo nrf.
 
-
+Actualicemos el NFProfile
 
 ##### Si estos campos son nuevas structs, crear estas structs y sus correspondientes métodos de serialización/deserialización
 
