@@ -62,12 +62,43 @@ El servicio Nnrf_NFManagement permite que una instancia de NF, SCP o SEPP en el 
 
 ### Actualizacion del NRF Aether
 
-Esta es la issue principal estaremos trabajando en el repo <https://github.com/networkgcorefullcode/nrf>.
+Esta es la issue principal estaremos trabajando en el repo <https://github.com/networkgcorefullcode/nrf> y en el repo <https://github.com/networkgcorefullcode/openapi>
 
-Sacaremos una rama donde se estara trabajando en esta nueva implementacion: el nombre de la rama es `feature/nrf-update`. Utilizar commits semanticos y por cada operacion que se implemente, hacer un commit con el mensaje correspondiente, tratar de no hacer commits grandes, si no que cada commit sea una operacion o un cambio especifico.
+Sacaremos una rama donde se estara trabajando en esta nueva implementacion: el nombre de la rama es `feature/nrf-update`. Utilizar commits semanticos y por cada operacion que se implemente, hacer un commit con el mensaje correspondiente, tratar de no hacer commits grandes, si no que cada commit sea una operacion o un cambio especifico. 
+
+En el NRF trabajaremos en la rama `feature/openapi-nrf-update`. En el repo de openapi trabajaremos en la rama de igual nombre `feature/openapi-nrf-update`.
 
 Dividiremos la implementación en varias tareas, cada una representada por una issue específica. Estas tareas incluirán:
 
 - [ ] Actualizacion de la struct NfProfile para incluir los nuevos campos necesarios.
 - [ ] Si estos campos son nuevas structs, crear estas structs y sus correspondientes métodos de serialización/deserialización.
 - [ ] No hay mas issue, agregar las nuevas tareas aqui
+
+#### Descripcion de como se esta trabajando en cada tarea
+
+##### Actualizacion de la struct NfProfile para incluir los nuevos campos necesarios
+
+Para esto se genero el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de nostros openApiFiles/files estan todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el release 16 tiene todos los .yml organizados hasta el release 16. Lo puedes ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+
+En una maquina ubuntu 22.04 hacer lo siguiente
+- Java 11 o superior
+- wget
+- Descargar el openapi-generator-cli.jar desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>
+- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar que se ha instalado correctamente.
+- Generar el cliente y servidor de go con los siguientes comandos:
+
+```bash
+java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio>   -g go   -o ./go-nrf-client
+```
+
+En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
+
+Con este cliente generado, se pueden realizar pruebas y desarrollos sobre el NRF de manera más sencilla.
+
+Ahora iremos paso a paso acutualizando el codigo del repo openapi y el repo nrf.
+
+
+
+##### Si estos campos son nuevas structs, crear estas structs y sus correspondientes métodos de serialización/deserialización
+
+##### No hay mas issue, agregar las nuevas tareas aqui
