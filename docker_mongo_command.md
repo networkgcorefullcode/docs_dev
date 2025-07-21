@@ -89,3 +89,28 @@ docker inspect <container_name>
 ```bash
 docker restart <container_name>
 ```
+
+## Entrar desde fuera del contenedor con un cliente MongoDB externo
+Para conectarte a MongoDB desde fuera del contenedor (por ejemplo, desde tu máquina local), asegúrate de que el puerto de MongoDB esté expuesto en el contenedor. Por defecto, MongoDB utiliza el puerto `27017`.
+
+Si iniciaste el contenedor con un comando como este:
+
+```bash
+docker run -d --name mongodb -p 27017:27017 mongo
+```
+
+Puedes conectarte usando un cliente MongoDB externo (como `mongosh`, `mongo` o una GUI como MongoDB Compass) con la siguiente cadena de conexión:
+
+```
+mongodb://localhost:27017
+```
+
+Si tu contenedor requiere autenticación, la cadena sería:
+
+```
+mongodb://<usuario>:<contraseña>@localhost:27017/<database_name>
+```
+
+Reemplaza `<usuario>`, `<contraseña>` y `<database_name>` según corresponda.
+
+Despues de todo esto utilizar los comandos vistos anteriormente
