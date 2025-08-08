@@ -297,6 +297,16 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 
 helm search repo onos
+
+## para revertir esto
+helm repo remove stable
+helm repo remove cord
+helm repo remove atomix
+helm repo remove onosproject
+helm repo remove sdran
+helm repo remove aether
+helm repo remove cetic
+helm repo remove bitnami
 ```
 
 Ahora desplegaremos el ROC, ejecutando los siguientes comandos, puedes ver la guia en el siguiente enlace [https://docs.onosproject.org/developers/deploy_with_helm/](https://docs.onosproject.org/developers/deploy_with_helm/)
@@ -355,10 +365,15 @@ Otra via de instalacion es dirigirnos a la carpeta helm-charts
 Y ejecutar los siguientes comandos:
 
 ```bash
-helm dependency build aether-roc-umbrella
-helm dependency build sd-core
 helm dependency build atomix-1.1.2/chart
 helm dependency build onos-operator
+cd aether-roc-umbrella
+rm Chart.lock
+helm dependency build .
+cd ..
+cd sd-core
+rm Chart.lock
+helm dependency build .
 ```
 
 Ejecutar ahora:
@@ -367,4 +382,38 @@ Ejecutar ahora:
 helm install -n kube-system atomix atomix-1.1.2/chart
 helm install -n kube-system onos-operator onos-operator
 helm install -n roc5g rocamp aether-roc-umbrella
+```
+
+Comandos para borrar kubernetes:
+
+```bash
+sudo systemctl stop kubelet
+sudo systemctl stop docker
+
+sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
+sudo apt-get autoremove
+
+# Reiniciar la pc en este paso
+sudo rm -rf ~/.kube
+sudo rm -rf /etc/kubernetes/
+sudo rm -rf /var/lib/etcd/
+sudo rm -rf /var/lib/kubelet/
+sudo rm -rf /var/lib/dockershim/
+sudo rm -rf /var/run/kubernetes/
+sudo rm -rf /etc/cni/
+sudo rm -rf /opt/cni/
+sudo rm -rf /opt/local-path-provisioner
+
+sudo docker system prune -a --volumes
+
+kubectl version
+# Debe decir comando no encontrado
+
+kubeadm version
+# Debe decir comando no encontrado
+
+sudo rm -rf $HOME/.cache/helm
+sudo rm -rf $HOME/.config/helm
+sudo rm -rf $HOME/.local/share/helm
+
 ```
