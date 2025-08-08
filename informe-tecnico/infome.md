@@ -324,6 +324,8 @@ Otros comandos utiles:
 helm -n micro-onos ls
 
 helm delete -n micro-onos onos-umbrella
+helm delete -n kube-system onos-operator
+helm delete -n kube-system atomix
 ```
 
 Este comando para instalar la GUI: 
@@ -347,3 +349,22 @@ kubectl port-forward svc/<nombre-del-servicio> <puerto-local>:<puerto-del-servic
 ```
 
 Para acceder a la GUI utilizar los puertos 30256, 31194
+
+Otra via de instalacion es dirigirnos a la carpeta helm-charts
+
+Y ejecutar los siguientes comandos:
+
+```bash
+helm dependency build aether-roc-umbrella
+helm dependency build sd-core
+helm dependency build atomix-1.1.2/chart
+helm dependency build onos-operator
+```
+
+Ejecutar ahora:
+
+```bash
+helm install -n kube-system atomix atomix-1.1.2/chart
+helm install -n kube-system onos-operator onos-operator
+helm install -n roc5g rocamp aether-roc-umbrella
+```
