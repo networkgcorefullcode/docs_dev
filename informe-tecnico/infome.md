@@ -281,3 +281,69 @@ SD-RAN: [https://github.com/networkgcorefullcode/sdran-helm-charts](https://gith
 
 SD-Core: [https://github.com/networkgcorefullcode/sdcore-helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts).
 
+Primero desplegaremos el ROC, para ello iremos al helm relacionado con el roc, dentro hay un chart llamado aether-roc-umbrella, que reune varias dependencias para desplegar el roc de aether.
+
+Ejecutar los siguientes comandos:
+
+```bash
+helm repo add stable https://charts.helm.sh/stable                        
+helm repo add cord https://charts.opencord.org                          
+helm repo add atomix https://charts.atomix.io                             
+helm repo add onosproject https://charts.onosproject.org                       
+helm repo add sdran https://sdrancharts.onosproject.org                  
+helm repo add aether https://charts.aetherproject.org                     
+helm repo add cetic https://cetic.github.io/helm-charts                  
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+helm search repo onos
+```
+
+Ahora desplegaremos el ROC, ejecutando los siguientes comandos, puedes ver la guia en el siguiente enlace [https://docs.onosproject.org/developers/deploy_with_helm/](https://docs.onosproject.org/developers/deploy_with_helm/)
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+```bash
+kubectl create namespace micro-onos
+
+helm install -n kube-system atomix atomix/atomix
+
+helm install -n kube-system onos-operator onosproject/onos-operator
+
+helm -n micro-onos install onos-umbrella onosproject/onos-umbrella
+
+kubectl -n micro-onos get pods -w
+```
+
+Otros comandos utiles:
+
+```bash
+helm -n micro-onos ls
+
+helm delete -n micro-onos onos-umbrella
+```
+
+Este comando para instalar la GUI: 
+
+```bash
+helm install -n micro-onos onos-gui onosproject/onos-gui
+
+helm delete -n micro-onos onos-gui
+```
+
+Tambien podemos hacer lo siguientes, dirigirnos al repositorio roc-helm-charts y ejecutar el siguiente comando (Recomendamos este, ya que instala todos los servicios necesarios):
+
+```bash
+helm install roc5gc aether-roc-umbrella
+```
+
+Esta plantilla sirve para exponer un servicio y poder acceder a el desde fuera, puede ser util.
+
+```bash
+kubectl port-forward svc/<nombre-del-servicio> <puerto-local>:<puerto-del-servicio> -n <namespace>
+```
+
+Para acceder a la GUI utilizar los puertos 30256, 31194
