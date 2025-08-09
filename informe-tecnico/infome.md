@@ -578,6 +578,20 @@ helm uninstall -n roc5g rocamp
 
 Revisar los logs y verificar que todo funcione correctamente, si hay errores en el despliegue, se debe revisar la configuracion proporcionada en el helm chart correspondiente.
 
+Puertos de los servicios
+
+| Servicio           | Puerto | Descripción                |
+|--------------------|--------|----------------------------|
+| amf                | 38412  | Interfaz NGAP              |
+|                    |        |                            |
+| smf                | 8805   | Interfaz PFCP              |
+| ausf               | 8080   | API REST                   |
+| nrf                | 8000   | Registro de funciones      |
+| pcf                | 8081   | Políticas de control       |
+| udm                | 8082   | Gestión de datos de usuario|
+| udr                | 8083   | Repositorio de datos       |
+| webui              | 31002  | Interfaz para el Webui     |
+
 ### Comandos para eliminar kubernetes
 
 ```bash
