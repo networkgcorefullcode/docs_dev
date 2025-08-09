@@ -85,7 +85,7 @@ sudo systemctl start docker
 ### ✅ 4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
 
 ```bash
-sudo apt-get update
+sudo apt-get update -y
 # apt-transport-https may be a dummy package; if so, you can skip that package
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 
@@ -96,7 +96,7 @@ curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --
 # This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
@@ -249,7 +249,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
-### Obtener charts
+### Obtener y operar charts
 
 Aether proporciona una serie de charts de helm, los cuales podemos configurar segun nuestras necesidades. Estos charts los podemos encontrar en:
 
@@ -381,6 +381,11 @@ Ejecutar ahora:
 ```bash
 helm install -n kube-system atomix atomix-1.1.2/chart
 helm install -n kube-system onos-operator onos-operator
+kubectl create namespace roc5g
+kubectl create namespace sdcore
+kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
+kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
+helm install -n sdcore core5g sd-core
 helm install -n roc5g rocamp aether-roc-umbrella
 ```
 
