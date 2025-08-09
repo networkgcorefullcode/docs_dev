@@ -568,6 +568,11 @@ kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-c
 kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
 helm install -n sdcore core5g sd-core
 helm install -n roc5g rocamp aether-roc-umbrella
+
+# para revertir lo anterior
+
+helm uninstall -n sdcore core5g
+helm uninstall -n roc5g rocamp
 ```
 
 Revisar los logs y verificar que todo funcione correctamente, si hay errores en el despliegue, se debe revisar la configuracion proporcionada en el helm chart correspondiente.
