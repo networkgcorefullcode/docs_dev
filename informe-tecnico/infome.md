@@ -1,5 +1,27 @@
 # Informe Técnico
 
+## Índice
+
+- [Introducción](#introducción)
+- [Para desarrollo](#pasos-iniciales)
+  - [Instalaciones necesarias](#instalaciones-necesarias)
+  - [Clonar repositorios](#clonar-repositorios)
+  - [Construir componentes](#construir-componentes)
+  - [Obtener builds](#obtener-builds)
+  - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
+  - [Entorno de docker](#entorno-de-docker)
+  - [Comandos Utiles](#comandos-utiles)
+
+- [Kubernete Enviroments](#kubernetes-enviroment)
+  - [Kubernetes OnRamp](#kubernetes-onramp)
+  - [Kubernetes para desarrollo](#kubernetes-para-desarrollo)
+    - [Requisitos](#requisitos)
+    - [Intalación-del-entorno-de-kubernetes](#intalación-del-entorno-de-kubernetes)
+    - [Trabajando con Helm](#trabajando-con-helm)
+      - [Instalación de Helm](#instalando-helm)
+      - [Obtener y operar Helm Charts](#obtener-y-operar-charts)
+    - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
+
 ## Introducción
 
 Este informe técnico, recopila todo lo realizado para tener un entorno de desarrollo, el cual nos permita integrar nuevos cambios a los elementos presentados por Aether.
@@ -18,9 +40,222 @@ En nuestro caso editamos el CI para adecuarlo a nuestras necesidades.
 
 Al hacer forks podemos contribuir en un futuro al proyecto.
 
-Las imagenes de docker se guardan en docker hub, si buscas network5gcore en docker hub deben de salirte las imagenes.
+Las imagenes de docker se guardan en docker hub, si buscas network5gcore en docker hub deben de salir las imagenes.
 
-## Requisitos
+---
+
+## Pasos iniciales
+
+Objetivo: construir las imagenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno valido para el desarrollo. Hacer ese entorno utilizando solo docker.
+
+### Instalaciones necesarias
+
+Las instalaciones necesarias son las siguientes:
+
+- [Go](https://go.dev/doc/install)
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fwindows%2Fx86-64%2Fstable%2F.exe+download)
+- Python version >= 3.8
+
+### Clonar repositorios
+
+En nuestro entorno ejecutar los siguientes comandos:
+
+```bash
+cd ~
+mkdir aether-forks
+cd aether-forks
+```
+
+Crear aqui el archivo `python_get_repos.py`:
+
+```bash
+touch python_get_repos.py
+```
+
+Copiar el siguiente código (Para clonar todos los repo rapidamente):
+
+```python
+import requests
+import os
+
+user = "networkgcorefullcode"  # Reemplaza con el nombre de usuario
+url = f"https://api.github.com/users/{user}/repos?per_page=100"
+repos = requests.get(url).json()
+
+for repo in repos:
+    os.system(f"git clone {repo['clone_url']}")
+```
+
+```bash
+python3 python_get_repos.py
+```
+
+Después de que termine la ejecución del script tendremos las siguientes carpetas:
+
+![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
+
+Actualmente al clonar los repositorios se clonara el repo utilFiles, en el cual se encuentran definidos varios de los archivos que definimos aquí, para poder utilizar estos archivos deberemos copiar su contenido en la raíz donde se encuentran todos los demas repos. Así los podremos utilizar sin problemas
+
+### Construir componentes
+
+Crear el script `build_components.sh`:
+
+```bash
+touch build_components.sh
+sudo chmod 700 build_components.sh
+```
+
+```bash
+#!/bin/bash
+
+for dir in "$PWD"/*/; do
+    [ -d "$dir" ] && echo "Directorio: $dir"
+    if (cd "$dir" && make all); then
+        :
+    else
+        echo "error al ejecutar make all"
+    fi
+done
+```
+
+Ejecutar el script para crear los builds de cada componente:
+
+```bash
+./build_components.sh
+```
+
+### Obtener builds
+
+Crear el script `get_builds.sh`:
+
+```bash
+touch get_builds.sh
+sudo chmod 700 get_builds.sh
+```
+
+```bash
+#!/bin/bash
+
+# Guardar el directorio actual en una variable
+current_dir="$PWD"
+
+# Recorre todos los directorios en la raíz del script
+for dir in "$current_dir"/* ; do
+    echo "Revisando $dir"
+    # Verifica si existe la carpeta bin dentro del directorio
+    if [ -d "$dir/bin" ]; then
+        # Copia el contenido de bin al directorio actual
+        cp -r "$dir/bin/" "$current_dir"
+        echo "Contenido de $dir/bin copiado a $current_dir"
+    fi
+done
+```
+
+Este script copiara todos los builds de go en una carpeta llamada bin
+
+```bash
+./get_builds.sh
+```
+
+![Binario de cada uno de los componentes](imgs/{BBEA4130-7110-4E58-8C59-AC1895312AAC}.png)
+
+Binario de cada uno de los componentes
+
+## Ejecutar componentes individualmente
+
+Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, podemos hacer lo siguiente:
+
+1. Asegurarnos de que el componente que queremos ejecutar tenga su binario en la carpeta `bin`.
+2. Abrir una terminal y navegar a la carpeta `bin` donde se encuentran los binarios de los componentes.
+3. Ejecutar el binario del componente deseado. Por ejemplo, si queremos ejecutar el componente `amf`, podemos usar el siguiente comando:
+
+```bash
+cd ~/aether-forks/bin
+```
+
+```bash
+./amf --cfg ~/aether-forks/configs_files/amfcfg.yaml
+```
+
+Asi para cada uno de los componentes, que soporten una configuracion inicial a través de un archivo YAML de configuración.
+
+Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es espcialmente útil para el desarrollo y la depuración de cada componente por separado.
+
+## Entorno de docker
+
+Para crear un entorno de desarrollo utilizando Docker, podemos utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
+
+En la carpeta `configs_files/` se deben colocar los archivos de configuración YAML para cada componente, como `amfcfg.yaml`, `ausfcfg.yaml`, etc. Estos archivos deben contener la configuración específica para cada componente.
+
+En el repo `utilFiles` actualmente hay una serie de docker-compose y script que levantan un entorno de docker, segun las configuraciones asociadas en `configs_files`
+
+Hasta ahora todo es una prueba, la configuracion puede que no sea estable, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
+
+## Comandos Utiles
+
+- Para detener todos los contenedores:
+
+```bash
+docker compose down
+```
+
+- Para ver los logs de un contenedor específico:
+
+```bash
+docker compose logs <nombre_del_contenedor>
+```
+
+- Para ejecutar comandos dentro de un contenedor en ejecución:
+
+```bash
+docker exec -it <nombre_del_contenedor> <comando>
+```
+
+Por ejemplo, para abrir una terminal bash en el contenedor `amf`:
+
+```bash
+docker exec -it amf /bin/bash
+```
+
+- Para reconstruir los contenedores después de hacer cambios en el código:
+
+```bash
+docker compose up -d --build
+```
+
+Si necesitas instalar utilidades adicionales como `vim`, `strace`, `net-tools`, `curl`, `netcat-openbsd` y `bind-tools` en un contenedor basado en Alpine Linux, puedes ejecutar el siguiente comando dentro del contenedor:
+
+```bash
+apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools
+```
+
+Esto actualizará los índices de paquetes e instalará las herramientas necesarias sin guardar archivos temporales, manteniendo la imagen ligera.
+
+Script para instalar herramientas en los contenedores core 5G:
+
+```bash
+#!/bin/bash
+
+# Lista de contenedores core 5G según docker-compose
+core5g_containers=(amf ausf nrf nssf pcf smf udm udr)
+
+for c in "${core5g_containers[@]}"; do
+    echo "Instalando herramientas en $c..."
+    docker exec -it "$c" sh -c "apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools"
+done
+```
+
+## Kubernetes Enviroment
+
+En las siguientes secciones se abordaran configuraciones relacionadas a un entorno de kubernetes, ambiente donde Aether fue diseñado para desplegarse
+
+## Kubernetes OnRamp
+
+## Kubernetes para desarrollo
+
+### Requisitos
 
 - Ubuntu Server version 22.04 or later
 - Docker
@@ -29,13 +264,13 @@ Las imagenes de docker se guardan en docker hub, si buscas network5gcore en dock
 
 ---
 
-## 🛠️ Intalación del entorno de Kubernetes
+### Intalación del entorno de Kubernetes
 
 ---
 
 Para desplegar Aether debemos tener un entorno de kubernetes, en el cual utilizando los diferentes charts de helm desplegaremos los diferentes servicios
 
-### ✅ 1. **Preparar el Servidor**
+#### ✅ 1. **Preparar el Servidor**
 
 Asegúrate de que tu Server tenga al menos:
 
@@ -47,7 +282,7 @@ Asegúrate de que tu Server tenga al menos:
 
 ---
 
-### ✅ 2. **Configurar el entorno base**
+#### ✅ 2. **Configurar el entorno base**
 
 ```bash
 # Actualizar paquetes
@@ -60,7 +295,7 @@ sudo sed -i '/ swap / s/^/#/' /etc/fstab
 
 ---
 
-### ✅ 3. **Instalar Docker (container runtime)**
+#### ✅ 3. **Instalar Docker (container runtime)**
 
 ```bash
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
@@ -82,7 +317,7 @@ sudo systemctl start docker
 
 ---
 
-### ✅ 4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
+#### ✅ 4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
 
 ```bash
 sudo apt-get update -y
@@ -105,7 +340,7 @@ sudo systemctl enable --now kubelet
 
 ---
 
-### ✅ 5. **Inicializar el clúster (modo single-node para pruebas)**
+#### ✅ 5. **Inicializar el clúster (modo single-node para pruebas)**
 
 ```bash
 # (opcional) Usa tu IP pública o privada como advertise address
@@ -197,7 +432,7 @@ sudo kubeadm init \
 
 ---
 
-### ✅ 6. **Configurar el entorno para el usuario actual**
+#### ✅ 6. **Configurar el entorno para el usuario actual**
 
 ```bash
 mkdir -p $HOME/.kube
@@ -207,7 +442,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ---
 
-### ✅ 7. **Instalar red de pods (ej. Calico)**
+#### ✅ 7. **Instalar red de pods (ej. Calico)**
 
 ```bash
 # Usando Calico como red de pods
@@ -216,7 +451,7 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/
 
 ---
 
-### ✅ 8. **Permitir que el nodo actúe como master y worker (modo prueba)**
+#### ✅ 8. **Permitir que el nodo actúe como master y worker (modo prueba)**
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
@@ -226,7 +461,7 @@ Esto es necesario si solo tienes **una máquina** y quieres que los pods de usua
 
 ---
 
-### ✅ 9. **Verifica que todo está funcionando**
+#### ✅ 9. **Verifica que todo está funcionando**
 
 ```bash
 kubectl get nodes
@@ -237,9 +472,9 @@ Debes ver algo como esto:
 
 ![alt text](imgs/{70E4BAB7-F16D-481C-AF22-A3AF4EC88405}.png)
 
-## Trabajando con Helm
+### Trabajando con Helm
 
-### Instalando Helm
+#### Instalando Helm
 
 Ejecuta:
 
@@ -249,7 +484,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
-### Obtener y operar charts
+#### Obtener y operar charts
 
 Aether proporciona una serie de charts de helm, los cuales podemos configurar segun nuestras necesidades. Estos charts los podemos encontrar en:
 
@@ -273,15 +508,9 @@ SD-RAN: [https://github.com/onosproject/sdran-helm-charts](https://github.com/on
 
 SD-Core: [https://github.com/omec-project/sdcore-helm-charts](https://github.com/omec-project/sdcore-helm-charts).
 
-De estos repos hicimos forks para trabajar segun nuestras necesidades.
+De estos repos hicimos repositorio para trabajar segun nuestras necesidades.
 
-ROC: [https://github.com/networkgcorefullcode/roc-helm-charts](https://github.com/networkgcorefullcode/roc-helm-charts)
-
-SD-RAN: [https://github.com/networkgcorefullcode/sdran-helm-charts](https://github.com/networkgcorefullcode/sdran-helm-charts)
-
-SD-Core: [https://github.com/networkgcorefullcode/sdcore-helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts).
-
-Primero desplegaremos el ROC, para ello iremos al helm relacionado con el roc, dentro hay un chart llamado aether-roc-umbrella, que reune varias dependencias para desplegar el roc de aether.
+SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts).
 
 Ejecutar los siguientes comandos:
 
@@ -309,60 +538,12 @@ helm repo remove cetic
 helm repo remove bitnami
 ```
 
-Ahora desplegaremos el ROC, ejecutando los siguientes comandos, puedes ver la guia en el siguiente enlace [https://docs.onosproject.org/developers/deploy_with_helm/](https://docs.onosproject.org/developers/deploy_with_helm/)
-
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-```bash
-kubectl create namespace micro-onos
-
-helm install -n kube-system atomix atomix/atomix
-
-helm install -n kube-system onos-operator onosproject/onos-operator
-
-helm -n micro-onos install onos-umbrella onosproject/onos-umbrella
-
-kubectl -n micro-onos get pods -w
-```
-
-Otros comandos utiles:
-
-```bash
-helm -n micro-onos ls
-
-helm delete -n micro-onos onos-umbrella
-helm delete -n kube-system onos-operator
-helm delete -n kube-system atomix
-```
-
-Este comando para instalar la GUI: 
-
-```bash
-helm install -n micro-onos onos-gui onosproject/onos-gui
-
-helm delete -n micro-onos onos-gui
-```
-
-Tambien podemos hacer lo siguientes, dirigirnos al repositorio roc-helm-charts y ejecutar el siguiente comando (Recomendamos este, ya que instala todos los servicios necesarios):
-
-```bash
-helm install roc5gc aether-roc-umbrella
-```
-
-Esta plantilla sirve para exponer un servicio y poder acceder a el desde fuera, puede ser util.
-
-```bash
-kubectl port-forward svc/<nombre-del-servicio> <puerto-local>:<puerto-del-servicio> -n <namespace>
-```
-
-Para acceder a la GUI utilizar los puertos 30256, 31194
-
-Otra via de instalacion es dirigirnos a la carpeta helm-charts
-
-Y ejecutar los siguientes comandos:
+Ejecutar los siguientes comandos desde el directorio `helm-charts/`:
 
 ```bash
 helm dependency build atomix-1.1.2/chart
@@ -389,7 +570,9 @@ helm install -n sdcore core5g sd-core
 helm install -n roc5g rocamp aether-roc-umbrella
 ```
 
-Comandos para borrar kubernetes:
+Revisar los logs y verificar que todo funcione correctamente, si hay errores en el despliegue, se debe revisar la configuracion proporcionada en el helm chart correspondiente.
+
+### Comandos para eliminar kubernetes
 
 ```bash
 sudo systemctl stop kubelet
@@ -420,5 +603,4 @@ kubeadm version
 sudo rm -rf $HOME/.cache/helm
 sudo rm -rf $HOME/.config/helm
 sudo rm -rf $HOME/.local/share/helm
-
 ```
