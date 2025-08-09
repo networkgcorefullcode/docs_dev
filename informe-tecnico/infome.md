@@ -514,6 +514,7 @@ SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.co
 
 Ejecutar los siguientes comandos:
 
+Opcional
 ```bash
 helm repo add stable https://charts.helm.sh/stable                        
 helm repo add cord https://charts.opencord.org                          
