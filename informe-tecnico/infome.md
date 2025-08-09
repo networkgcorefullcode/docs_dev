@@ -13,7 +13,7 @@
   - [Comandos Utiles](#comandos-utiles)
 
 - [Kubernete Enviroments](#kubernetes-enviroment)
-  - [Kubernetes OnRamp](#kubernetes-onramp)
+  - [Aether OnRamp](#aether-onramp)
   - [Kubernetes para desarrollo](#kubernetes-para-desarrollo)
     - [Requisitos](#requisitos)
     - [Intalación-del-entorno-de-kubernetes](#intalación-del-entorno-de-kubernetes)
@@ -251,7 +251,99 @@ done
 
 En las siguientes secciones se abordaran configuraciones relacionadas a un entorno de kubernetes, ambiente donde Aether fue diseñado para desplegarse
 
-## Kubernetes OnRamp
+## Aether OnRamp
+
+### Imágenes de Docker
+
+Para desplegar los componentes de Aether actualizados, es necesario tener las imágenes de cada NF. Para ello se realizaron los siguientes pasos.
+
+1. En el repo de cada NF se editó el archivo `VERSION` y se cambió a un valor personalizado, en este caso fue: `v1.2.1-new-dev`
+
+2. En el archivo `Makefile` se completaron las siguientes variables:
+```makefile
+DOCKER_REGISTRY ?= 192.168.12.15:8083/
+DOCKER_REPOSITORY ?= omecproject/
+```
+- `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus en los servidores de la empresa
+- `DOCKER_REPOSITORY` se configuró con nombre del repositorio por defecto de Aether SD-Core
+
+3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al rregistry. Para hacer el *push* es necesario primero loguearse en el Nexus con `docker login 192.168.12.15:8083`.
+
+Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una version diferente o subir las imagenes a otro registry de Docker.
+
+
+### Configuración del *values* de Helm
+
+El archivo de *values* de Helm se encuentra en la siguiente ruta, partiendo desde el directorio raíz del repositorio de Aether OnRamp: `/deps/5gc/roles/core/templates/sdcore-5g-values.yaml`
+
+En este archivo se hicieron varias configuraciones.
+
+1. Se configuró el despliegue para que bajara las imágenes actualizadas del registry privado en Nexus de la siguiente forma:
+
+```yaml
+5g-control-plane:
+  enable5G: true
+  images:
+    repository: "192.168.12.15:8083/"
+    tags:
+      amf: omecproject/5gc-amf:v1.2.1-new-dev
+      ausf: omecproject/5gc-ausf:v1.2.1-new-dev
+      smf: omecproject/5gc-smf:v1.2.1-new-dev
+      udm: omecproject/5gc-udm:v1.2.1-new-dev
+      udr: omecproject/5gc-udr:v1.2.1-new-dev
+      pcf: omecproject/5gc-pcf:v1.2.1-new-dev
+      nrf: omecproject/5gc-nrf:v1.2.1-new-dev
+      webui: omecproject/5gc-webui:v1.2.1-new-dev
+      sctplb: omecproject/sctplb:v1.2.1-new-dev
+      nssf: omecproject/5gc-nssf:v1.2.1-new-dev
+      upfadapter: omecproject/upfadapter:v1.2.2-new-dev
+
+
+# otras configuraciones....
+
+omec-sub-provision:
+  enable: true
+  images:
+    repository: "192.168.12.15:8083/"
+    tags:
+      simapp: omecproject/simapp:v1.2.1-new-dev
+
+
+# otras configuraciones....
+
+omec-user-plane:
+  enable: true
+  nodeSelectors:
+    enabled: true
+  resources:
+    enabled: false
+  images:
+    repository: "192.168.12.15:8082/"
+     #tags:
+       #bess: omecproject/upf-epc-bess:v1.2.1-new-dev
+       #pfcpiface: omecproject/upf-epc-pfcpiface:v1.2.1-new-dev
+      # tools: omecproject/busybox:stable
+
+# otras configuraciones....
+
+```
+- Es importante destacar que el `tag` definido para cada imagen debe contener la siguiente estructura debido a que así es como se estructura la imagen en el registry
+```
+omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el archivo VERSION del repo del componente>
+```
+- Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
+
+2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR) y fueron modificadas otras (WebUI, AMF, NRF, entre otras). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads). 
+
+3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** por el puerto `5001`. Es por eso que cada NF debe tener esta configuración.
+```yaml
+ webuiUri: "http://webui:5001"
+```
+El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io) que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definido en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso esta incluido en el despliegue del 5GC con Ansible.
+
+### Simulación
+
+Por el momento todos los Pods de Aether llegan al estado `Running` y se han realizado simulaciones para comprobar un funcionamiento correcto. Se ha obtenido como resultado que la `gnb` simulada se conecta exitosamente al 5GC pero a la hora de conectar el `ue` ocurren fallos. Los errores están en proceso de debugueo.
 
 ## Kubernetes para desarrollo
 
@@ -514,7 +606,6 @@ SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.co
 
 Ejecutar los siguientes comandos:
 
-Opcional
 ```bash
 helm repo add stable https://charts.helm.sh/stable                        
 helm repo add cord https://charts.opencord.org                          
