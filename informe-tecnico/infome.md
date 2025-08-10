@@ -743,6 +743,396 @@ Puertos de los servicios
 | webui              | 30001  | Interfaz para el Webui                    |
 | mongodb-express    | 30081  | Interfaz web para interactuar con mongodb |
 
+Para ejecutar el user-plane en una instancia EC2 de AWS, seguir los siguientes pasos
+
+1. **Requisitos de red (VPC prerequisites)**
+
+   * Crear una VPC con tres subredes: `mgmt`, `access` y `core`.
+   * Hacer accesibles a internet las subredes `mgmt` y `core`.
+   * Configurar rutas (incluyendo para eNB/gNB si están en on-premise).
+   * Crear interfaces de red (ENIs) para `access` y `core`, desactivar el *source/destination check* en `core` y añadir ruta para la subred de UEs.
+
+2. **Lanzar la instancia EC2**
+
+   * Usar un tipo con **ENA** habilitado (ej. `c5.2xlarge`) y AMI Ubuntu 20.04.
+   * Inicialmente conectar solo la subred `mgmt`, y luego añadir las ENIs de `access` y `core`.
+
+3. **Configurar el sistema operativo**
+
+   * Habilitar **HugePages de 1Gi** modificando GRUB.
+   * Cargar y configurar el driver **vfio-pci** con modo *unsafe IOMMU*.
+   * Asociar las interfaces `access` y `core` al driver vfio-pci usando `driverctl`.
+
+4. **Configurar Kubernetes (K8S)**
+
+   * Instalar **Multus CNI**.
+   * Instalar y configurar el **SR-IOV device plugin** para las interfaces de `access` y `core` (asignadas por PCI).
+   * Verificar recursos disponibles: HugePages y dispositivos SR-IOV.
+   * Instalar el binario `vfioveth` en `/opt/cni/bin`.
+
+5. **Instalar BESS-UPF**
+
+   * Requiere helm chart con licencia de miembros ONF.
+   * Usar un `overriding-values.yaml` con configuración de subredes, direcciones IP, MAC y recursos SR-IOV.
+   * Desplegar con `helm install` y verificar que el pod `upf-0` esté en estado *Running*.
+
+
+Preparación del VPC
+
+---
+
+1️⃣ Crear la **VPC**
+
+1. Ve a **VPC → Your VPCs → Create VPC**.
+2. Modo: **VPC only**.
+3. Nombre: `upf-vpc`.
+4. IPv4 CIDR: por ejemplo `10.0.0.0/16`.
+5. Crear.
+
+---
+
+2️⃣ Crear las **subredes**
+
+Necesitamos **tres subnets** dentro de la misma VPC:
+
+* **mgmt** → para administrar la instancia (acceso SSH, K8s API, etc.)
+* **access** → tráfico hacia/desde gNB/eNB
+* **core** → tráfico hacia el core de red (internet o N6)
+
+Ejemplo:
+
+| Nombre | CIDR        | Zona AZ    |
+| ------ | ----------- | ---------- |
+| mgmt   | 10.0.1.0/24 | us-east-1a |
+| access | 10.0.2.0/24 | us-east-1a |
+| core   | 10.0.3.0/24 | us-east-1a |
+
+En la consola:
+
+1. **VPC → Subnets → Create subnet**
+2. Selecciona `upf-vpc` y crea las 3 subnets con sus CIDRs.
+
+---
+
+3️⃣ Hacer accesibles a Internet las subredes **mgmt** y **core**
+
+Hay varias formas:
+
+* Opción fácil: asignarlas a un **Internet Gateway**.
+* Opción del ejemplo: usar **NAT Gateway** en una subred pública.
+
+Ejemplo con NAT Gateway:
+
+1. **VPC → Internet Gateways → Create internet gateway** → Adjuntar a `upf-vpc`.
+2. Crea una **subred pública** extra, ej. `10.0.10.0/24`, con **Auto-assign Public IPv4** habilitado.
+3. **Elastic IPs** → reservar una IP y usarla al crear el NAT Gateway.
+4. **VPC → NAT Gateways → Create NAT Gateway** en la subred pública.
+5. En las **Route Tables** de `mgmt` y `core`:
+
+   * Añadir ruta `0.0.0.0/0` → hacia el **NAT Gateway** esto en las routes table de core
+   * Añadir ruta `0.0.0.0/0` → hacia el **Internet Gateway** esto en las routes table de mgmt
+
+---
+
+4️⃣ Configurar rutas para **access**
+
+Si tienes gNB/eNB **on-premise**:
+
+* Ve a **Route Tables** de `access` y añade rutas hacia las redes de las estaciones base, apuntando al gateway correcto (VPN, Direct Connect, etc.).
+
+---
+
+5️⃣ Crear **ENIs** para access y core
+
+1. **EC2 → Network Interfaces → Create network interface**.
+
+   * Para `access`: subnet `access`, sin IP pública.
+   * Para `core`: subnet `core`, sin IP pública.
+2. Guarda los **IDs** de cada ENI (los usarás luego para adjuntarlos a la EC2).
+
+---
+
+6️⃣ Desactivar **source/destination check** en la ENI de core
+
+Esto permite que la interfaz enrute tráfico que no sea solo para ella.
+
+1. Selecciona la ENI de `core`.
+2. **Actions → Change source/dest. check → Disable**.
+
+---
+
+7️⃣ Añadir ruta para la **UE pool subnet**
+
+Esto es para que el tráfico hacia los UEs pase por la interfaz core.
+
+1. Ve a la **Route Table** de la subred pública o la que use el internet/NAT.
+2. Añade ruta:
+
+   * Destination: `SUBRED_UE_POOL` (ej. `10.22.0.128/26`)
+   * Target: **ENI core**.
+
+---
+
+Preparación de la instancia EC2
+
+---
+
+**1️⃣ Lanzar la instancia EC2**
+
+1. Ve a **AWS Console → EC2 → Launch instance**.
+2. **Name**: por ejemplo `ec2-server`.
+3. **AMI**: selecciona **Ubuntu Server 22.04 LTS (64-bit x86)**.
+4. **Instance type**: selecciona **c5.2xlarge** (o cualquier tipo con ENA habilitado y suficiente rendimiento).
+5. **Key pair**: selecciona o crea uno para poder conectarte por SSH.
+
+---
+
+**2️⃣ Configurar red inicial (solo `mgmt`)**
+
+1. En **Network settings**:
+
+   * **VPC**: selecciona la que creaste (`upf-vpc` o el nombre que tenga).
+   * **Subnet**: elige **solo la subred mgmt** (la que tiene acceso a Internet o NAT Gateway).
+   * **Auto-assign Public IP**: habilitado, para que puedas conectarte por SSH.
+2. En **Security group**:
+
+   * Asegúrate de permitir **SSH (TCP 22)** desde tu IP.
+
+---
+
+**3️⃣ Lanzar y conectarte**
+
+* Haz clic en **Launch instance**.
+* Conéctate por SSH a la IP pública:
+
+```bash
+ssh -i tu_clave.pem ubuntu@IP_PUBLICA
+```
+
+---
+
+**4️⃣ Crear y adjuntar las ENIs de `access` y `core`**
+
+**(Esto se hace después de que la instancia está corriendo)**
+
+1. Ve a **EC2 → Network Interfaces → Create network interface**. Esto se indico en los pasos anteriores
+
+   * **Name**: `eni-access`.
+   * **Subnet**: subred `access`.
+   * **Auto-assign Public IP**: desactivado (solo se necesita en `mgmt`).
+   * Crea otra igual pero para `core` (`eni-core`).
+
+2. **Desactivar Source/Destination Check** en la ENI `core`:
+
+   * Selecciona la ENI `eni-core`.
+   * En **Actions → Change source/dest. check → Disable**.
+
+3. **Adjuntar las ENIs a la instancia**:
+
+   * En la ENI `eni-access`, ve a **Actions → Attach** y elige tu instancia.
+   * Repite para `eni-core`.
+
+---
+
+**5️⃣ Verificar desde el SO**
+
+Dentro de la instancia, ejecuta:
+
+```bash
+ip addr
+```
+
+Deberías ver:
+
+* `ens5` → interfaz de `mgmt` (con IP pública o detrás de NAT).
+* Otra interfaz para `access`.
+* Otra interfaz para `core`.
+
+---
+
+Configuracion del sistema
+
+SSH a la máquina virtual y actualiza Grub para habilitar HugePages de 1Gi.
+
+```bash
+$ sudo vi /etc/default/grub
+# Edit grub command line
+GRUB_CMDLINE_LINUX="transparent_hugepage=never default_hugepagesz=1G hugepagesz=1G hugepages=2"
+
+$ sudo update-grub
+```
+Carga el controlador vfio-pci y habilita el modo unsafe IOMMU.
+
+``` bash
+sudo su -
+modprobe vfio-pci
+echo "options vfio enable_unsafe_noiommu_mode=1" > /etc/modprobe.d/vfio-noiommu.conf
+echo "vfio-pci" > /etc/modules-load.d/vfio-pci.conf
+reboot
+```
+
+Después de reiniciar, verifica los cambios.
+
+```bash
+$ cat /proc/meminfo | grep Huge
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+FileHugePages:         0 kB
+HugePages_Total:       2
+HugePages_Free:        2
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:    1048576 kB
+Hugetlb:         4194304 kB
+
+$ cat /sys/module/vfio/parameters/enable_unsafe_noiommu_mode
+```
+
+Por último, asocia las interfaces `access` y `core` al controlador vfio.  
+Antes de continuar, toma nota de las direcciones MAC de las dos ENIs, ya sea desde el panel de EC2 o usando el comando `aws ec2 describe-network-interfaces`.  
+Estas direcciones MAC son necesarias para identificar la dirección PCI de cada interfaz.
+
+```bash
+# Find interface name of the access and core subnet ENIs by comparing the MAC address
+$ ip link show ens6
+$ ip link show ens7
+
+# Find PCI address of the access and core subnet ENIs
+$ lshw -c network -businfo
+Bus info          Device           Class      Description
+=========================================================
+pci@0000:00:05.0  ens5             network    Elastic Network Adapter (ENA)
+pci@0000:00:06.0  ens6             network    Elastic Network Adapter (ENA) # access in this example
+pci@0000:00:07.0  ens7             network    Elastic Network Adapter (ENA) # core in this example
+
+# Install driverctl
+$ sudo apt update
+$ sudo apt install driverctl
+
+# Check current driver
+$ sudo driverctl -v list-devices | grep -i net
+0000:00:05.0 ena (Elastic Network Adapter (ENA))
+0000:00:06.0 ena (Elastic Network Adapter (ENA))
+0000:00:07.0 ena (Elastic Network Adapter (ENA))
+
+# Bind access and core interfaces to vfio-pci driver
+$ sudo driverctl set-override 0000:00:06.0 vfio-pci
+$ sudo driverctl set-override 0000:00:07.0 vfio-pci
+
+# Verify
+$ sudo driverctl -v list-devices | grep -i net
+# 0000:00:05.0 ena (Elastic Network Adapter (ENA))
+# 0000:00:06.0 vfio-pci [*] (Elastic Network Adapter (ENA))
+# 0000:00:07.0 vfio-pci [*] (Elastic Network Adapter (ENA))
+
+$ ls -l /dev/vfio/
+# crw------- 1 root root 242,   0 Aug 17 22:15 noiommu-0
+# crw------- 1 root root 242,   1 Aug 17 22:16 noiommu-1
+# crw-rw-rw- 1 root root  10, 196 Aug 17 21:51 vfio
+```
+
+Configurando k8s
+
+La instalación de Kubernetes (K8S) está fuera del alcance de esta guía. Una vez que K8S esté listo en la máquina virtual, deberás instalar `Multus` y `sriov-device-plugin`.
+
+```bash
+# Install Multus
+$ kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/release-3.7/images/multus-daemonset.yml
+
+# Verify
+$ kubectl get ds -n kube-system kube-multus-ds
+# NAME             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE
+# kube-multus-ds   1         1         1       1            1
+
+# Create sriov device plugin config
+# Replace PCI address if necessary
+$ cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sriovdp-config
+data:
+  config.json: |
+    {
+      "resourceList": [
+        {
+          "resourceName": "intel_sriov_vfio_access",
+          "selectors": {
+            "pciAddresses": ["0000:00:06.0"]
+          }
+        },
+        {
+          "resourceName": "intel_sriov_vfio_core",
+          "selectors": {
+            "pciAddresses": ["0000:00:07.0"]
+          }
+        }
+      ]
+    }
+EOF
+
+# Create sriov device plugin DaemonSet
+$ kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/sriov-network-device-plugin/v3.3/deployments/k8s-v1.16/sriovdp-daemonset.yaml
+
+# Verify
+$ kubectl get ds -n kube-system kube-sriov-device-plugin-amd64
+# NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE
+# kube-sriov-device-plugin-amd64   1         1         1       1            1
+```
+
+Verifica los recursos asignables en el nodo. Asegúrate de que haya 2 HugePages de 1Gi, 1 `intel_sriov_vfio_access` y 1 `intel_sriov_vfio_core`.
+
+```bash
+$ kubectl get node  -o json | jq '.items[].status.allocatable'
+{
+  "attachable-volumes-aws-ebs": "25",
+  "cpu": "7",
+  "ephemeral-storage": "46779129369",
+  "hugepages-1Gi": "2Gi",
+  "hugepages-2Mi": "0",
+  "intel.com/intel_sriov_vfio_access": "1",
+  "intel.com/intel_sriov_vfio_core": "1",
+  "memory": "13198484Ki",
+  "pods": "110"
+}
+```
+
+Por último, copia el binario `vfioveth` de CNI en la ruta `/opt/cni/bin` dentro de la máquina virtual.
+
+```bash
+sudo wget -O /opt/cni/bin/vfioveth https://raw.githubusercontent.com/opencord/omec-cni/master/vfioveth
+sudo chmod +x /opt/cni/bin/vfioveth
+```
+
+Instalando bess upf con Helm
+
+El chart de Helm de BESS UPF está actualmente bajo licencia exclusiva para miembros de ONF. Si ya tienes acceso al chart, proporciona los siguientes valores de override al desplegarlo. No olvides reemplazar correctamente las direcciones IP y MAC según tu entorno.
+
+```bash
+$ cat >> overriding-values.yaml << EOF
+config:
+  upf:
+    privileged: true
+    enb:
+      subnet: "10.22.0.128/26"
+    access:
+      ip: "172.31.67.192/24"
+      gateway: "172.31.67.1"
+      mac: "02:ee:e9:c8:a5:31"
+      resourceName: "intel.com/intel_sriov_vfio_access"
+    core:
+      ip: "172.31.68.136/24"
+      gateway: "172.31.68.1"
+      mac: "02:67:74:80:be:35"
+      resourceName: "intel.com/intel_sriov_vfio_core"
+EOF
+
+$ helm install -n bess-upf bess-upf [path/to/helm/chart] -f overriding-values.yaml
+$ kubectl get po -n bess-upf
+# NAME    READY   STATUS    RESTARTS   AGE
+# upf-0   4/4     Running   0          41h
+```
+
 ### Comandos para eliminar kubernetes
 
 ```bash
