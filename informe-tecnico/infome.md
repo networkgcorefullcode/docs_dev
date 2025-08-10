@@ -20,6 +20,7 @@
     - [Trabajando con Helm](#trabajando-con-helm)
       - [Instalación de Helm](#instalando-helm)
       - [Obtener y operar Helm Charts](#obtener-y-operar-charts)
+      - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
 
 ## Introducción
@@ -658,6 +659,7 @@ kubectl create namespace roc5g
 kubectl create namespace sdcore
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
+kubectl label node ip-172-31-16-24 node-role.aetherproject.org=omec-upf
 helm install -n sdcore core5g sd-core
 helm install -n roc5g rocamp aether-roc-umbrella
 
@@ -667,21 +669,79 @@ helm uninstall -n sdcore core5g
 helm uninstall -n roc5g rocamp
 ```
 
+#### Utils
+
+Para habilitar una instancia de mongodb express que nos provea de una interfaz web para visualizar facilmente la base de datos mongodb. Crear y guardar esto en un nuestro entorno
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app.kubernetes.io/name: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+        - name: mongo-express
+          image: mongo-express:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: ME_CONFIG_MONGODB_SERVER
+              value: "mongodb"  # Nombre del servicio de MongoDB
+            - name: ME_CONFIG_MONGODB_PORT
+              value: "27017"
+            - name: ME_CONFIG_BASICAUTH_USERNAME
+              value: "admin"
+            - name: ME_CONFIG_BASICAUTH_PASSWORD
+              value: "admin123"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express
+spec:
+  type: NodePort
+  selector:
+    app: mongo-express
+  ports:
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30081
+```
+
+Ejecutar el comando apply correspondiente
+
+```bash
+kubectl apply -f <file_name> -n <name_space>
+```
+
 Revisar los logs y verificar que todo funcione correctamente, si hay errores en el despliegue, se debe revisar la configuracion proporcionada en el helm chart correspondiente.
 
 Puertos de los servicios
 
-| Servicio           | Puerto | Descripción                |
-|--------------------|--------|----------------------------|
-| amf                | 38412  | Interfaz NGAP              |
-|                    |        |                            |
-| smf                | 8805   | Interfaz PFCP              |
-| ausf               | 8080   | API REST                   |
-| nrf                | 8000   | Registro de funciones      |
-| pcf                | 8081   | Políticas de control       |
-| udm                | 8082   | Gestión de datos de usuario|
-| udr                | 8083   | Repositorio de datos       |
-| webui              | 31002  | Interfaz para el Webui     |
+| Servicio           | Puerto | Descripción                               |
+|--------------------|--------|-------------------------------------------|
+| webui              | 30001  | Interfaz para el Webui                    |
+| mongodb-express    | 30081  | Interfaz web para interactuar con mongodb |
 
 ### Comandos para eliminar kubernetes
 
