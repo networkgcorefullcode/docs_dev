@@ -661,7 +661,7 @@ kubectl create namespace roc5g
 kubectl create namespace sdcore
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
-kubectl label node ip-172-31-16-24 node-role.aetherproject.org=omec-upf
+kubectl label node <node_name> node-role.aetherproject.org=omec-upf
 helm install -n sdcore core5g sd-core
 helm install -n roc5g rocamp aether-roc-umbrella
 
@@ -778,6 +778,8 @@ Para ejecutar el user-plane en una instancia EC2 de AWS, seguir los siguientes p
    * Usar un `overriding-values.yaml` con configuración de subredes, direcciones IP, MAC y recursos SR-IOV.
    * Desplegar con `helm install` y verificar que el pod `upf-0` esté en estado *Running*.
 
+
+#### Preparación para un entorno EC2 AWS
 
 Preparación del VPC
 
@@ -978,17 +980,18 @@ Después de reiniciar, verifica los cambios.
 
 ```bash
 $ cat /proc/meminfo | grep Huge
-AnonHugePages:         0 kB
-ShmemHugePages:        0 kB
-FileHugePages:         0 kB
-HugePages_Total:       2
-HugePages_Free:        2
-HugePages_Rsvd:        0
-HugePages_Surp:        0
-Hugepagesize:    1048576 kB
-Hugetlb:         4194304 kB
+# AnonHugePages:         0 kB
+# ShmemHugePages:        0 kB
+# FileHugePages:         0 kB
+# HugePages_Total:       2
+# HugePages_Free:        2
+# HugePages_Rsvd:        0
+# HugePages_Surp:        0
+# Hugepagesize:    1048576 kB
+# Hugetlb:         4194304 kB
 
 $ cat /sys/module/vfio/parameters/enable_unsafe_noiommu_mode
+# Y
 ```
 
 Por último, asocia las interfaces `access` y `core` al controlador vfio.  
