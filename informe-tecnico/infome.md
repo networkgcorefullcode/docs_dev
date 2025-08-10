@@ -1052,7 +1052,7 @@ $ kubectl get ds -n kube-system kube-multus-ds
 
 # Create sriov device plugin config
 # Replace PCI address if necessary
-$ cat <<EOF | kubectl apply -f -
+$ cat <<EOF | kubectl apply -n kube-system -f -
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1089,18 +1089,20 @@ $ kubectl get ds -n kube-system kube-sriov-device-plugin-amd64
 Verifica los recursos asignables en el nodo. Asegúrate de que haya 2 HugePages de 1Gi, 1 `intel_sriov_vfio_access` y 1 `intel_sriov_vfio_core`.
 
 ```bash
+sudo apt update
+sudo apt install jq -y
 $ kubectl get node  -o json | jq '.items[].status.allocatable'
-{
-  "attachable-volumes-aws-ebs": "25",
-  "cpu": "7",
-  "ephemeral-storage": "46779129369",
-  "hugepages-1Gi": "2Gi",
-  "hugepages-2Mi": "0",
-  "intel.com/intel_sriov_vfio_access": "1",
-  "intel.com/intel_sriov_vfio_core": "1",
-  "memory": "13198484Ki",
-  "pods": "110"
-}
+# {
+#   "attachable-volumes-aws-ebs": "25",
+#   "cpu": "7",
+#   "ephemeral-storage": "46779129369",
+#   "hugepages-1Gi": "2Gi",
+#   "hugepages-2Mi": "0",
+#   "intel.com/intel_sriov_vfio_access": "1",
+#   "intel.com/intel_sriov_vfio_core": "1",
+#   "memory": "13198484Ki",
+#   "pods": "110"
+# }
 ```
 
 Por último, copia el binario `vfioveth` de CNI en la ruta `/opt/cni/bin` dentro de la máquina virtual.
