@@ -961,6 +961,7 @@ GRUB_CMDLINE_LINUX="transparent_hugepage=never default_hugepagesz=1G hugepagesz=
 
 $ sudo update-grub
 ```
+
 Carga el controlador vfio-pci y habilita el modo unsafe IOMMU.
 
 ``` bash
