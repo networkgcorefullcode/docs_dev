@@ -650,6 +650,7 @@ cd ..
 cd sd-core
 rm Chart.lock
 helm dependency build .
+cd ..
 ```
 
 Ejecutar ahora:
@@ -1114,10 +1115,11 @@ sudo chmod +x /opt/cni/bin/vfioveth
 
 Instalando bess upf con Helm
 
-El chart de Helm de BESS UPF está actualmente bajo licencia exclusiva para miembros de ONF. Si ya tienes acceso al chart, proporciona los siguientes valores de override al desplegarlo. No olvides reemplazar correctamente las direcciones IP y MAC según tu entorno.
+En el repo helm-charts hay una rama llamada deploy-ec2, aqui estan los helm-charts modificados, para que todo funcione correctamente en la instancia EC2.
 
-```bash
-$ cat >> overriding-values.yaml << EOF
+En el values.yml edita esta sección según tus ip y macs.
+
+```yml
 config:
   upf:
     privileged: true
@@ -1133,10 +1135,11 @@ config:
       gateway: "172.31.68.1"
       mac: "02:67:74:80:be:35"
       resourceName: "intel.com/intel_sriov_vfio_core"
-EOF
+```
 
-$ helm install -n bess-upf bess-upf [path/to/helm/chart] -f overriding-values.yaml
-$ kubectl get po -n bess-upf
+```bash
+$ helm install -n sdcore core5g sd-core
+$ kubectl get pods -A
 # NAME    READY   STATUS    RESTARTS   AGE
 # upf-0   4/4     Running   0          41h
 ```
