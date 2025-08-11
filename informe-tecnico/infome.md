@@ -672,6 +672,35 @@ helm uninstall -n sdcore core5g
 helm uninstall -n roc5g rocamp
 ```
 
+Si los servicios relacionados con mongodb no estan funcionando asegurate de que se descargaron los charts como dependencias prueba ejecutar este comando en cada uno de los charts que hay como dependencia.
+
+```bash
+# dirigete a sd-core/charts
+cd sd-core/charts
+
+charts=("5g-control-plane" "5g-ran-sim" "bess-upf" "omec-control-plane" "omec-sub-provision")
+
+for chart in "${charts[@]}"; do
+    helm dependency build "$chart"
+    helm dependency update "$chart"
+done
+
+cd ..
+cd ..
+```
+
+El webui es un componente principal para el funcionamiento del core 5g de Aether, en este despliegue se puede retrasar su despliegue con frecuencia y provocar problemas en los demas componentes, para solucionar esto pasado un tiempo deberemos eliminar cada uno de los componentes del core para que el deployment los vuelva a reiniciar y ahora con el webui en funcionamiento las cosas funcionen mejor. Los siguientes comandos realizan esa acción.
+
+```bash
+# Puedes usar un comando kubectl para listar todos los pods excepto el webui:
+
+kubectl get pods -n sdcore | grep -v webui | grep -v mongodb | grep -v kafka | grep -v core5g-zookeeper
+
+# Usa el siguiente comando para eliminar todos los pods excepto el webui:
+
+kubectl get pods -n sdcore | grep -v webui | grep -v mongodb | grep -v kafka | grep -v core5g-zookeeper | awk '{print $1}' | xargs kubectl delete pod -n sdcore
+```
+
 #### Utils
 
 Para habilitar una instancia de mongodb express que nos provea de una interfaz web para visualizar facilmente la base de datos mongodb. Crear y guardar esto en un nuestro entorno
@@ -1026,6 +1055,10 @@ $ sudo driverctl -v list-devices | grep -i net
 $ sudo driverctl set-override 0000:00:06.0 vfio-pci
 $ sudo driverctl set-override 0000:00:07.0 vfio-pci
 
+# para revertir
+sudo driverctl unset-override 0000:00:06.0
+sudo driverctl unset-override 0000:00:07.0
+
 # Verify
 $ sudo driverctl -v list-devices | grep -i net
 # 0000:00:05.0 ena (Elastic Network Adapter (ENA))
@@ -1117,7 +1150,9 @@ Instalando bess upf con Helm
 
 En el repo helm-charts hay una rama llamada deploy-ec2, aqui estan los helm-charts modificados, para que todo funcione correctamente en la instancia EC2.
 
-En el values.yml edita esta sección según tus ip y macs.
+A continuacion edita overriding-values.yaml según tus ip y macs (utiliza vim o nano, tu editor de texto de preferencia).
+
+Verás algo como esto:
 
 ```yml
 config:
@@ -1138,11 +1173,16 @@ config:
 ```
 
 ```bash
-$ helm install -n sdcore core5g sd-core
-$ kubectl get pods -A
+$ kubectl create namespace bess-upf
+$ helm install -n bess-upf bess-upf [path/to/helm/chart] -f overriding-values.yaml
+$ kubectl get po -n bess-upf
 # NAME    READY   STATUS    RESTARTS   AGE
 # upf-0   4/4     Running   0          41h
 ```
+
+Para el modo af_packet seguir las siguientes instrucciones. En este modo lo único que varia es que no debemos hacer ninguna configuracion extra en el sistema operativo, no debemos configurar hugepages ni nada relacionado con el despliegue en modo dpgk.
+
+
 
 ### Comandos para eliminar kubernetes
 
