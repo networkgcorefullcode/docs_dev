@@ -59,6 +59,16 @@ Las instalaciones necesarias son las siguientes:
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fwindows%2Fx86-64%2Fstable%2F.exe+download)
 - Python version >= 3.8
 
+Comandos para instalar go en linux ubuntu 22.04
+
+```bash
+cd ~
+wget https://go.dev/dl/go1.24.6.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.24.6.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+go version
+```
+
 ### Clonar repositorios
 
 En nuestro entorno ejecutar los siguientes comandos:
@@ -663,13 +673,21 @@ kubectl create namespace sdcore
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
 kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
 kubectl label node <node_name> node-role.aetherproject.org=omec-upf
+
+cd ~
+git clone https://github.com/containernetworking/plugins.git
+cd plugins
+sudo chmod +x build_linux.sh
+./build_linux.sh
+```
+
+Ahora ejecutar los siguientes comandos de helm para desplegar el core 5G. Deberemos de estar en el repo helm-charts para ejecutar estos comandos.
+
+```bash
+
+# Desplegar el core 5G
 helm install -n sdcore core5g sd-core
-helm install -n roc5g rocamp aether-roc-umbrella
 
-# para revertir lo anterior
-
-helm uninstall -n sdcore core5g
-helm uninstall -n roc5g rocamp
 ```
 
 Si los servicios relacionados con mongodb no estan funcionando asegurate de que se descargaron los charts como dependencias prueba ejecutar este comando en cada uno de los charts que hay como dependencia.
