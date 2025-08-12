@@ -416,6 +416,8 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io
 # Habilitar Docker
 sudo systemctl enable docker
 sudo systemctl start docker
+
+sudo usermod -aG docker $USER
 ```
 
 ---
@@ -1197,10 +1199,6 @@ $ kubectl get po -n bess-upf
 # NAME    READY   STATUS    RESTARTS   AGE
 # upf-0   4/4     Running   0          41h
 ```
-
-Para el modo af_packet seguir las siguientes instrucciones. En este modo lo único que varia es que no debemos hacer ninguna configuracion extra en el sistema operativo, no debemos configurar hugepages ni nada relacionado con el despliegue en modo dpdk.
-
-
 
 ### Comandos para eliminar kubernetes
 
