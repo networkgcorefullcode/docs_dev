@@ -1198,7 +1198,7 @@ $ kubectl get po -n bess-upf
 # upf-0   4/4     Running   0          41h
 ```
 
-Para el modo af_packet seguir las siguientes instrucciones. En este modo lo único que varia es que no debemos hacer ninguna configuracion extra en el sistema operativo, no debemos configurar hugepages ni nada relacionado con el despliegue en modo dpgk.
+Para el modo af_packet seguir las siguientes instrucciones. En este modo lo único que varia es que no debemos hacer ninguna configuracion extra en el sistema operativo, no debemos configurar hugepages ni nada relacionado con el despliegue en modo dpdk.
 
 
 
