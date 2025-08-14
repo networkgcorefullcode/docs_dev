@@ -41,13 +41,13 @@ En nuestro caso editamos el CI para adecuarlo a nuestras necesidades.
 
 Al hacer forks podemos contribuir en un futuro al proyecto.
 
-Las imagenes de docker se guardan en docker hub, si buscas network5gcore en docker hub deben de salir las imagenes.
+Las imágenes de Docker se guardan en  Docker Hub si se bucsa "network5gcore" en Docker Hub deben de salir las imágenes.
 
 ---
 
 ## Pasos iniciales
 
-Objetivo: construir las imagenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno valido para el desarrollo. Hacer ese entorno utilizando solo docker.
+Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
 
 ### Instalaciones necesarias
 
@@ -85,7 +85,7 @@ Crear aqui el archivo `python_get_repos.py`:
 touch python_get_repos.py
 ```
 
-Copiar el siguiente código (Para clonar todos los repo rapidamente):
+Copiar el siguiente código (Para clonar todos los repositorios rápidamente):
 
 ```python
 import requests
@@ -107,7 +107,7 @@ Después de que termine la ejecución del script tendremos las siguientes carpet
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Actualmente al clonar los repositorios se clonara el repo utilFiles, en el cual se encuentran definidos varios de los archivos que definimos aquí, para poder utilizar estos archivos deberemos copiar su contenido en la raíz donde se encuentran todos los demas repos. Así los podremos utilizar sin problemas
+Actualmente al clonar los repositorios se clonara el repo utilFiles, en el cual se encuentran definidos varios de los archivos que definimos aquí, para poder utilizar estos archivos deberemos copiar su contenido en la raíz donde se encuentran todos los demás repos. Así los podremos utilizar sin problemas
 
 ### Construir componentes
 
@@ -164,7 +164,7 @@ for dir in "$current_dir"/* ; do
 done
 ```
 
-Este script copiara todos los builds de go en una carpeta llamada bin
+Este script copiará todos los builds de go en una carpeta llamada bin
 
 ```bash
 ./get_builds.sh
@@ -192,7 +192,7 @@ cd ~/aether-forks/bin
 
 Asi para cada uno de los componentes, que soporten una configuracion inicial a través de un archivo YAML de configuración.
 
-Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es espcialmente útil para el desarrollo y la depuración de cada componente por separado.
+Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
 
 ## Entorno de docker
 
@@ -202,7 +202,7 @@ En la carpeta `configs_files/` se deben colocar los archivos de configuración Y
 
 En el repo `utilFiles` actualmente hay una serie de docker-compose y script que levantan un entorno de docker, segun las configuraciones asociadas en `configs_files`
 
-Hasta ahora todo es una prueba, la configuracion puede que no sea estable, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
+Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
 
 ## Comandos Utiles
 
@@ -280,7 +280,7 @@ DOCKER_REPOSITORY ?= omecproject/
 
 3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al rregistry. Para hacer el *push* es necesario primero loguearse en el Nexus con `docker login 192.168.12.15:8083`.
 
-Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una version diferente o subir las imagenes a otro registry de Docker.
+Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una version diferente o subir las imágenes a otro registry de Docker.
 
 
 ### Configuración del *values* de Helm
@@ -352,9 +352,6 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 ```
 El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io) que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definido en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso esta incluido en el despliegue del 5GC con Ansible.
 
-### Simulación
-
-Por el momento todos los Pods de Aether llegan al estado `Running` y se han realizado simulaciones para comprobar un funcionamiento correcto. Se ha obtenido como resultado que la `gnb` simulada se conecta exitosamente al 5GC pero a la hora de conectar el `ue` ocurren fallos. Los errores están en proceso de debugueo.
 
 ## Kubernetes para desarrollo
 
@@ -373,19 +370,19 @@ Por el momento todos los Pods de Aether llegan al estado `Running` y se han real
 
 Para desplegar Aether debemos tener un entorno de kubernetes, en el cual utilizando los diferentes charts de helm desplegaremos los diferentes servicios
 
-#### ✅ 1. **Preparar el Servidor**
+####  1. **Preparar el Servidor**
 
 Asegúrate de que tu Server tenga al menos:
 
-- ✅ 2 CPUs (4 si vas a desplegar Aether)
-- ✅ 4–8 GB de RAM (mejor con 8 GB para SD-Core)
-- ✅ 20+ GB de almacenamiento
-- ✅ Sistema operativo Ubuntu Server 22.04 LTS
-- ✅ Seguridad: grupo de seguridad con puertos abiertos (SSH, 6443, 80, 443, 22, etc.)
+- 2 CPUs (4 si vas a desplegar Aether)
+-  4–8 GB de RAM (mejor con 8 GB para SD-Core)
+-  20+ GB de almacenamiento
+-  Sistema operativo Ubuntu Server 22.04 LTS
+-  Seguridad: grupo de seguridad con puertos abiertos (SSH, 6443, 80, 443, 22, etc.)
 
 ---
 
-#### ✅ 2. **Configurar el entorno base**
+#### 2. **Configurar el entorno base**
 
 ```bash
 # Actualizar paquetes
@@ -398,7 +395,7 @@ sudo sed -i '/ swap / s/^/#/' /etc/fstab
 
 ---
 
-#### ✅ 3. **Instalar Docker (container runtime)**
+####  3. **Instalar Docker (container runtime)**
 
 ```bash
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
@@ -422,7 +419,7 @@ sudo usermod -aG docker $USER
 
 ---
 
-#### ✅ 4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
+####  4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
 
 ```bash
 sudo apt-get update -y
@@ -445,7 +442,7 @@ sudo systemctl enable --now kubelet
 
 ---
 
-#### ✅ 5. **Inicializar el clúster (modo single-node para pruebas)**
+####  5. **Inicializar el clúster (modo single-node para pruebas)**
 
 ```bash
 # (opcional) Usa tu IP pública o privada como advertise address
@@ -456,7 +453,7 @@ sudo kubeadm init \
 
 ```
 
-> ✅ Esto instalará un clúster con Calico/Flannel-compatible pod CIDR.
+>  Esto instalará un clúster con Calico/Flannel-compatible pod CIDR.
 
 Si presentar problemas relacionados con que no encuentra el containerd.sock, puedes hacer lo siguiente:
 
@@ -537,7 +534,7 @@ sudo kubeadm init \
 
 ---
 
-#### ✅ 6. **Configurar el entorno para el usuario actual**
+#### 6. **Configurar el entorno para el usuario actual**
 
 ```bash
 mkdir -p $HOME/.kube
@@ -547,7 +544,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ---
 
-#### ✅ 7. **Instalar red de pods (ej. Calico)**
+####  7. **Instalar red de pods (ej. Calico)**
 
 ```bash
 # Usando Calico como red de pods
@@ -556,7 +553,7 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/
 
 ---
 
-#### ✅ 8. **Permitir que el nodo actúe como master y worker (modo prueba)**
+####  8. **Permitir que el nodo actúe como master y worker (modo prueba)**
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
@@ -566,7 +563,7 @@ Esto es necesario si solo tienes **una máquina** y quieres que los pods de usua
 
 ---
 
-#### ✅ 9. **Verifica que todo está funcionando**
+#### 9. **Verifica que todo está funcionando**
 
 ```bash
 kubectl get nodes
@@ -1231,4 +1228,428 @@ kubeadm version
 sudo rm -rf $HOME/.cache/helm
 sudo rm -rf $HOME/.config/helm
 sudo rm -rf $HOME/.local/share/helm
+```
+
+
+
+## Pruebas de simulación y trazas de logs de registro
+
+#### Configuraciones previas
+
+Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM. 
+
+`vars/main.yml`
+```yml
+###...otras configuraciones
+
+core:
+
+###...otras configuraciones
+
+  amf:
+    ip: "<aether_server_IP>"
+
+ueransim:
+  gnb:
+    ip: "<ueransim_server_IP>"
+
+###...otras configuraciones
+
+```
+
+`host.ini`
+```
+[all]
+node1 ansible_host=<aether_server_IP> ansible_user=<host_user>
+ansible_ssh_private_key_file=<path_to_ssh_private_key>
+node2 ansible_host=<ueransim_server_IP> ansible_user=<host_user> ansible_ssh_private_key_file=<path_to_ssh_private_key>
+
+[master_nodes]
+node1
+
+[worker_nodes]
+#node2
+#node3
+
+[gnbsim_nodes]
+#node1
+#node2
+#node4
+
+[oai_nodes]
+#node2
+#node4
+
+[ueransim_nodes]
+node2
+#node4
+
+[srsran_nodes]
+#node2
+#node4
+```
+
+
+#### Despliegue de Aether  y UERANSIM
+
+
+Para desplegar aether primeramente es necesario instalar Kubernetes con:
+```bash
+make aether-k8s-install
+```
+
+
+Luego se despliega Aether con:
+```bash
+make aether-5gc-install
+```
+
+
+Para desplegar UERANSIM se corre el comando:
+```bash
+make aether-ueransim-install
+```
+
+
+
+#### Simulación
+
+Para correr la simulación con UERANSIM se debe entrar por ssh a la VM del simulador, y en la carpeta `ueransim/build` correr los siguientes comandos.
+
+Para simular la `gnb`:
+```bash
+./nr-gnb -c ../config/custom-gnb.yaml
+```
+
+Resultado esperado del comando anterior:
+```
+UERANSIM v3.2.7
+[2025-08-13 15:55:46.882] [sctp] [info] Trying to establish SCTP connection... (192.168.12.11:38412)
+[2025-08-13 15:55:46.921] [sctp] [info] SCTP connection established (192.168.12.11:38412)
+[2025-08-13 15:55:46.921] [sctp] [debug] SCTP association setup ascId[3]
+[2025-08-13 15:55:46.921] [ngap] [debug] Sending NG Setup Request
+[2025-08-13 15:55:46.926] [ngap] [debug] NG Setup Response received
+[2025-08-13 15:55:46.926] [ngap] [info] NG Setup procedure is successful
+[2025-08-13 15:56:03.299] [rrc] [debug] UE[1] new signal detected
+[2025-08-13 15:56:03.301] [rrc] [info] RRC Setup for UE[1]
+[2025-08-13 15:56:03.306] [ngap] [debug] Initial NAS message received from UE[1]
+[2025-08-13 15:56:03.961] [ngap] [debug] Initial Context Setup Request received
+[2025-08-13 15:56:04.955] [ngap] [info] PDU session resource(s) setup for UE[1] count[1]
+[2025-08-13 15:56:08.164] [rls] [debug] UE[1] signal lost
+[2025-08-13 15:56:12.658] [rrc] [debug] UE[2] new signal detected
+[2025-08-13 15:56:12.658] [rrc] [info] RRC Setup for UE[2]
+[2025-08-13 15:56:12.658] [ngap] [debug] Initial NAS message received from UE[2]
+[2025-08-13 15:56:12.957] [ngap] [debug] Initial Context Setup Request received
+[2025-08-13 15:56:13.355] [ngap] [info] PDU session resource(s) setup for UE[2] count[1]
+```
+
+
+Para simular el UE:
+```bash
+./nr-ue -c ../config/custom-ue.yaml
+```
+
+Resultado esperado del comando anterior:
+```
+UERANSIM v3.2.7
+[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
+[2025-08-13 15:56:12.658] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
+[2025-08-13 15:56:12.658] [nas] [info] Selected plmn[208/93]
+[2025-08-13 15:56:12.658] [rrc] [info] Selected cell plmn[208/93] tac[1] category[SUITABLE]
+[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
+[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
+[2025-08-13 15:56:12.658] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
+[2025-08-13 15:56:12.658] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-08-13 15:56:12.658] [nas] [debug] Sending Initial Registration
+[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
+[2025-08-13 15:56:12.658] [rrc] [debug] Sending RRC Setup Request
+[2025-08-13 15:56:12.658] [rrc] [info] RRC connection established
+[2025-08-13 15:56:12.658] [rrc] [info] UE switches to state [RRC-CONNECTED]
+[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [CM-CONNECTED]
+[2025-08-13 15:56:12.698] [nas] [debug] Authentication Request received
+[2025-08-13 15:56:12.698] [nas] [debug] Received SQN [000000000022]
+[2025-08-13 15:56:12.698] [nas] [debug] SQN-MS [000000000000]
+[2025-08-13 15:56:12.770] [nas] [debug] Security Mode Command received
+[2025-08-13 15:56:12.770] [nas] [debug] Selected integrity[3] ciphering[3]
+[2025-08-13 15:56:12.958] [nas] [debug] Registration accept received
+[2025-08-13 15:56:12.958] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
+[2025-08-13 15:56:12.958] [nas] [debug] Sending Registration Complete
+[2025-08-13 15:56:12.958] [nas] [info] Initial Registration is successful
+[2025-08-13 15:56:12.958] [nas] [debug] Sending PDU Session Establishment Request
+[2025-08-13 15:56:12.958] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-08-13 15:56:13.355] [nas] [debug] PDU Session Establishment Accept received
+[2025-08-13 15:56:13.355] [nas] [info] PDU Session establishment is successful PSI[1]
+[2025-08-13 15:56:13.361] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 192.168.100.2] is up.
+```
+
+
+Luego de que esten correctamente inicializados el `gnb` y el `ue` se puede hacer ping a google con:
+
+```bash
+./nr-binder <uesimtun_interface_IP> ping google.com
+```
+
+`uesimtun_interface_IP` es la IP de la interfaz `uesimtun` que se puede obtener con el comando:
+
+```bash
+ip a
+```
+
+
+
+#### Cambio en la configuracion del *service* `nrf`.
+
+Para que el UDM pueda acceder el puerto del *service* del NRF es necesario cambiar su tipo a `NodePort`. Esto se puede hacer con las siguientes instrucciones:
+
+```bash
+kubebctl edit svc nrf -n aether-5gc
+```
+- Comando para editar el `svc nrf` del *namespace* `aether-5gc`
+
+Salida esperada:
+```yaml
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: sd-core
+    meta.helm.sh/release-namespace: aether-5gc
+  creationTimestamp: "2025-08-12T15:13:15Z"
+  labels:
+    app: nrf
+    app.kubernetes.io/managed-by: Helm
+    release: sd-core
+  name: nrf
+  namespace: aether-5gc
+  resourceVersion: "2363477"
+  uid: b98e0080-3133-42fd-b362-4c9f1502e15c
+spec:
+  clusterIP: 10.43.77.24
+  clusterIPs:
+  - 10.43.77.24
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: sbi
+    nodePort: 4567
+    port: 29510
+    protocol: TCP
+    targetPort: 29510
+  selector:
+    app: nrf
+    release: sd-core
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+```
+
+
+Se debe cambiar el campo `spec.type` a `NodePort`. 
+
+
+> [!NOTE] Nota Importante
+> Este cambio se realiza "en caliente" luego de que esta desplegado todo el cluster. Si por algún motivo se reinstala Aether este cambio se sobreescribe por su configuración original y es necesario cambiarlo nuevamente.
+
+
+Luego de hacer el cambio de configuración en el *service* del NRF si se ejecuta el comando `kubectl get svc -n aether-5gc` se podrá observar como el *service* del NRF tiene un puerto mapeado.
+
+
+#### Instalación de Docker y Docker Compose
+
+Docker:
+```bash
+sudo apt update 
+sudo apt install -y docker.io
+```
+
+Para usarlo como usuario normal:
+```bash
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+Docker-Compose:
+```bash
+sudo wget -c https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-`uname -s`-`uname -m` -O /usr/local/bin/docker-compose; sudo chmod +x /usr/local/bin/docker-compose
+```
+
+
+#### Despliegue del UDM de Open5GS
+
+Clonar el siguiente repositorio para obtener todos los archivos necesarios:
+```
+git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
+```
+
+Nota: Este repositorio tiene además configuraciones para el AUSF, el UDR y el Webui de Open5GS para probar la integración de estas NFs con Aether. Por el momento este informe solo estará enfocado al registro del UDM.
+
+Antes de desplegar el UDM de Open5GS se debe editar su archivo de configuración para indicarle la dirección de la URI del NRF de Aether. Dentro de la carpeta del repositorio clonado ejecutar el siguiente comando
+```bash
+nano udm/udm.yaml
+```
+
+Se debe cambiar la dirección de `udm.sbi.client.nrf.uri` por la dirección IP del server y el puerto en el que se mapea el *service* del NRF de Aether. A continuación se muestra un ejemplo:
+
+```yaml
+logger:
+    file:
+      path: /open5gs/install/var/log/open5gs/udm.log
+
+sbi:
+    server:
+      no_tls: true
+    client:
+      no_tls: true
+
+global:
+  max:
+    ue: MAX_NUM_UE
+
+udm:
+    hnet:
+      - id: 1
+        scheme: 1
+        key: /open5gs/install/etc/open5gs/hnet/curve25519-1.key
+      - id: 2
+        scheme: 2
+        key: /open5gs/install/etc/open5gs/hnet/secp256r1-2.key
+    sbi:
+      server:
+        - address: UDM_IP
+          port: 7777
+      client:
+        nrf:
+          - uri: http://192.168.12.11:4567 # 4567 es el puerto que del svc NRF
+#        scp:
+#          - uri: http://SCP_IP:7777
+```
+
+
+Luego se puede desplegar el UDM de Open5GS en Docker, utilizando el siguiente comando:
+```bash
+docker-compose -f udm-deploy.yaml up -d
+```
+
+
+#### Evidencia de registro en los logs
+
+Luego de completar el despliegue del UDM se pueden ver los logs del contenedor con el comando:
+```bash
+docker logs udm
+```
+
+
+Salida esperada:
+```logs-UDM
+Deploying component: 'udm'
+Open5GS daemon v2.7.5-24-g8e286b6
+
+08/13 19:57:51.599: [app] INFO: Configuration: '/open5gs/install/etc/open5gs/udm.yaml' (../lib/app/ogs-init.c:144)
+08/13 19:57:51.599: [app] INFO: File Logging: '/open5gs/install/var/log/open5gs/udm.log' (../lib/app/ogs-init.c:147)
+08/13 19:57:51.600: [sbi] INFO: Setup NF EndPoint(addr) [192.168.12.11:17548] (../lib/sbi/context.c:459)
+08/13 19:57:51.601: [sbi] INFO: NF Service [nudm-ueau] (../lib/sbi/context.c:1994)
+08/13 19:57:51.601: [sbi] INFO: NF Service [nudm-uecm] (../lib/sbi/context.c:1994)
+08/13 19:57:51.601: [sbi] INFO: NF Service [nudm-sdm] (../lib/sbi/context.c:1994)
+08/13 19:57:51.601: [sbi] INFO: nghttp2_server() [http://172.22.0.13]:7777 (../lib/sbi/nghttp2-server.c:439)
+08/13 19:57:51.601: [app] INFO: UDM initialize...done (../src/udm/app.c:31)
+08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
+08/13 19:57:51.609: [sbi] ERROR: HTTP ERROR Status : 400 (../lib/sbi/message.c:1528)
+08/13 19:57:51.609: [sbi] WARNING: No links (../lib/sbi/nf-sm.c:391)
+08/13 19:57:51.610: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
+08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
+```
+
+En la línea 
+```
+08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
+```
+Se puede ver el resultado del registro del UDM en el NRF de Aether.
+
+
+
+Los logs del NRF se pueden obtener con el comando:
+```bash
+kubectl logs -n aether-5gc <NRF_pod_name>
+```
+
+Salida esperada:
+```logs-NRF
+2025-08-13T19:57:51.601Z	DEBUG	management/api_nf_instance_id_document.go:102	Deserialize json data in the struct NfProfile	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z	DEBUG	producer/nf_management.go:461	[NRF] In NFRegisterProcedure	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z	WARN	context/management_data.go:73	PLMN config not provided by NF, using supported PLMNs from webconsole	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:78	Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}]	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:435	NfServices is nil, setting NfServices from NfServiceList	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:443	finish the function nnrfNFManagementOption	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.606Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.607Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:542	Location header:  http://nrf:29510/nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z	DEBUG	producer/nf_management.go:70	register success	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z	INFO	logger/logger.go:91	| 201 |   192.168.12.11 | PUT     | /nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d | 	{"component": "NRF", "category": "GIN"}
+2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:182	Handle CreateSubscriptionRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:123	Handle GetNFInstancesRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.609Z	ERROR	producer/nf_management.go:127	Error in string conversion:  0	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.609Z	INFO	logger/logger.go:91	| 400 |   192.168.12.11 | GET     | /nnrf-nfm/v1/nf-instances | 	{"component": "NRF", "category": "GIN"}
+```
+
+
+En estos logs se puede ver la llegada de la solititud de registro del UDM de Open5GS:
+```logs-NRF
+08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
+```
+
+
+Se activa el procedimiento de registro:
+```logs-NRF
+2025-08-13T19:57:51.601Z	DEBUG	producer/nf_management.go:461	[NRF] In NFRegisterProcedure	{"component": "NRF", "category": "MGMT"}
+```
+
+
+Se obtienen las configuraciones de PLMN del `webconsole` ya que no fueron provistas por el NF nuevo (UDM)
+```logs-NRF
+2025-08-13T19:57:51.601Z	WARN	context/management_data.go:73	PLMN config not provided by NF, using supported PLMNs from webconsole	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:78	Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}]	{"component": "NRF", "category": "MGMT"}
+```
+
+
+Se crea un `NFProfile` para la nueva NF
+```logs-NRF
+2025-08-13T19:57:51.607Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
+```
+
+
+Registro exitoso:
+```logs-NRF
+2025-08-13T19:57:51.608Z	DEBUG	producer/nf_management.go:70	register success	{"component": "NRF", "category": "MGMT"}
+```
+
+
+Luego del registro el NRF recibe una petición por parte del UDM para conocer otras NFs del Core:
+```logs-NRF
+2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:123	Handle GetNFInstancesRequest	{"component": "NRF", "category": "MGMT"}
+```
+
+
+El NRF de Aether encuentra un error (Error in string conversion: 0) al procesar la petición de descubrimiento del UDM. Como resultado, responde al UDM con un error **400 Bad Request**.
+```logs-NRF
+2025-08-13T19:57:51.609Z	ERROR	producer/nf_management.go:127	Error in string conversion:  0	{"component": "NRF", "category": "MGMT"}
+```
+
+
+El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en su lugar recibió un "Bad Request". Como no puede descubrir otros servicios, su inicialización falla.
+```logs-UDM
+08/13 19:57:51.609: [sbi] ERROR: HTTP ERROR Status : 400 (../lib/sbi/message.c:1528)
+08/13 19:57:51.609: [sbi] WARNING: No links (../lib/sbi/nf-sm.c:391)
+08/13 19:57:51.610: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
+08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
