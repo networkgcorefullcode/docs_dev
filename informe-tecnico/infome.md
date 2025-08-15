@@ -10,44 +10,46 @@
   - [Obtener builds](#obtener-builds)
   - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
   - [Entorno de docker](#entorno-de-docker)
-  - [Comandos Utiles](#comandos-utiles)
+  - [Comandos útiles](#comandos-útiles)
 
-- [Kubernete Enviroments](#kubernetes-enviroment)
+- [Kubernetes Environment](#kubernetes-environment)
   - [Aether OnRamp](#aether-onramp)
   - [Kubernetes para desarrollo](#kubernetes-para-desarrollo)
     - [Requisitos](#requisitos)
-    - [Intalación-del-entorno-de-kubernetes](#intalación-del-entorno-de-kubernetes)
+    - [Instalación-del-entorno-de-kubernetes](#instalación-del-entorno-de-kubernetes)
     - [Trabajando con Helm](#trabajando-con-helm)
       - [Instalación de Helm](#instalando-helm)
       - [Obtener y operar Helm Charts](#obtener-y-operar-charts)
       - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
+- [Ejemplos de desarrollo](#ejemplos-de-desarrollo)
+- [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
 
 ## Introducción
 
-Este informe técnico, recopila todo lo realizado para tener un entorno de desarrollo, el cual nos permita integrar nuevos cambios a los elementos presentados por Aether.
+Este informe técnico recopila todo lo realizado para tener un entorno de desarrollo que nos permita integrar nuevos cambios a los elementos presentados por Aether.
 
-Para trabajar segun nuestras necesidades hicimos forks de algunos de los repos de Aether, los cuales se pueden encontrar en los siguientes enlaces:
+Para trabajar según nuestras necesidades, hicimos forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
 
-GitHub repository for the OMEC Project ([https://github.com/omec-project](https://github.com/omec-project)): Microservices for SD-Core, plus the emulator (gNBsim) that subjects SD-Core to RAN workloads.
+GitHub repository for the OMEC Project ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete SD-Core a cargas de trabajo RAN.
 
-GitHub repository for the ONOS Project ([https://github.com/onosproject](https://github.com/onosproject)): Microservices for SD-RAN and ROC, plus the YANG models used to generate the Aether API.
+GitHub repository for the ONOS Project ([https://github.com/onosproject](https://github.com/onosproject)): Microservicios para SD-RAN y ROC, además de los modelos YANG utilizados para generar la API de Aether.
 
-GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://github.com/opennetworkinglab) — OnRamp documentation and playbooks for deploying Aether.
+GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://github.com/opennetworkinglab) — Documentación de OnRamp y playbooks para desplegar Aether.
 
-Los forks los puede encontrar aquí en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
+Los forks se pueden encontrar en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
 
-En nuestro caso editamos el CI para adecuarlo a nuestras necesidades.
+En nuestro caso, editamos el CI para adecuarlo a nuestras necesidades.
 
-Al hacer forks podemos contribuir en un futuro al proyecto.
+Al hacer forks, podemos contribuir en un futuro al proyecto.
 
-Las imágenes de Docker se guardan en  Docker Hub si se bucsa "network5gcore" en Docker Hub deben de salir las imágenes.
+Las imágenes de Docker se guardan en Docker Hub. Si se busca "network5gcore" en Docker Hub, deben aparecer las imágenes.
 
 ---
 
 ## Pasos iniciales
 
-Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando nuestra configuracion hacer un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
+Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando nuestra configuración para crear un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
 
 ### Instalaciones necesarias
 
@@ -57,9 +59,9 @@ Las instalaciones necesarias son las siguientes:
 - [Docker](https://docs.docker.com/engine/install/ubuntu/)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fwindows%2Fx86-64%2Fstable%2F.exe+download)
-- Python version >= 3.8
+- Python versión >= 3.8
 
-Comandos para instalar go en linux ubuntu 22.04
+Comandos para instalar Go en Linux Ubuntu 22.04:
 
 ```bash
 cd ~
@@ -71,7 +73,7 @@ go version
 
 ### Clonar repositorios
 
-En nuestro entorno ejecutar los siguientes comandos:
+En nuestro entorno, ejecutar los siguientes comandos:
 
 ```bash
 cd ~
@@ -79,13 +81,13 @@ mkdir aether-forks
 cd aether-forks
 ```
 
-Crear aqui el archivo `python_get_repos.py`:
+Crear aquí el archivo `python_get_repos.py`:
 
 ```bash
 touch python_get_repos.py
 ```
 
-Copiar el siguiente código (Para clonar todos los repositorios rápidamente):
+Copiar el siguiente código (para clonar todos los repositorios rápidamente):
 
 ```python
 import requests
@@ -96,18 +98,18 @@ url = f"https://api.github.com/users/{user}/repos?per_page=100"
 repos = requests.get(url).json()
 
 for repo in repos:
-    os.system(f"git clone {repo['clone_url']}")
+  os.system(f"git clone {repo['clone_url']}")
 ```
 
 ```bash
 python3 python_get_repos.py
 ```
 
-Después de que termine la ejecución del script tendremos las siguientes carpetas:
+Después de que termine la ejecución del script, tendremos las siguientes carpetas:
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Actualmente al clonar los repositorios se clonara el repo utilFiles, en el cual se encuentran definidos varios de los archivos que definimos aquí, para poder utilizar estos archivos deberemos copiar su contenido en la raíz donde se encuentran todos los demás repos. Así los podremos utilizar sin problemas
+Actualmente, al clonar los repositorios se clonará el repositorio utilFiles, en el cual se encuentran definidos varios de los archivos que mencionamos aquí. Para poder utilizar estos archivos, deberemos copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así los podremos utilizar sin problemas.
 
 ### Construir componentes
 
@@ -122,12 +124,12 @@ sudo chmod 700 build_components.sh
 #!/bin/bash
 
 for dir in "$PWD"/*/; do
-    [ -d "$dir" ] && echo "Directorio: $dir"
-    if (cd "$dir" && make all); then
-        :
-    else
-        echo "error al ejecutar make all"
-    fi
+  [ -d "$dir" ] && echo "Directorio: $dir"
+  if (cd "$dir" && make all); then
+    :
+  else
+    echo "Error al ejecutar make all"
+  fi
 done
 ```
 
@@ -154,17 +156,17 @@ current_dir="$PWD"
 
 # Recorre todos los directorios en la raíz del script
 for dir in "$current_dir"/* ; do
-    echo "Revisando $dir"
-    # Verifica si existe la carpeta bin dentro del directorio
-    if [ -d "$dir/bin" ]; then
-        # Copia el contenido de bin al directorio actual
-        cp -r "$dir/bin/" "$current_dir"
-        echo "Contenido de $dir/bin copiado a $current_dir"
-    fi
+  echo "Revisando $dir"
+  # Verifica si existe la carpeta bin dentro del directorio
+  if [ -d "$dir/bin" ]; then
+    # Copia el contenido de bin al directorio actual
+    cp -r "$dir/bin/" "$current_dir"
+    echo "Contenido de $dir/bin copiado a $current_dir"
+  fi
 done
 ```
 
-Este script copiará todos los builds de go en una carpeta llamada bin
+Este script copiará todos los builds de Go en una carpeta llamada bin.
 
 ```bash
 ./get_builds.sh
@@ -190,21 +192,21 @@ cd ~/aether-forks/bin
 ./amf --cfg ~/aether-forks/configs_files/amfcfg.yaml
 ```
 
-Asi para cada uno de los componentes, que soporten una configuracion inicial a través de un archivo YAML de configuración.
+Así para cada uno de los componentes que soporten una configuración inicial a través de un archivo YAML de configuración.
 
 Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
 
-## Entorno de docker
+## Entorno de Docker
 
 Para crear un entorno de desarrollo utilizando Docker, podemos utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
 
 En la carpeta `configs_files/` se deben colocar los archivos de configuración YAML para cada componente, como `amfcfg.yaml`, `ausfcfg.yaml`, etc. Estos archivos deben contener la configuración específica para cada componente.
 
-En el repo `utilFiles` actualmente hay una serie de docker-compose y script que levantan un entorno de docker, segun las configuraciones asociadas en `configs_files`
+En el repositorio `utilFiles` actualmente hay una serie de docker-compose y scripts que levantan un entorno de Docker, según las configuraciones asociadas en `configs_files`.
 
-Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier correcion de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea facil desarrollar y comprobar los resultados en nuestro entorno.
+Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y comprobar los resultados en nuestro entorno.
 
-## Comandos Utiles
+## Comandos útiles
 
 - Para detener todos los contenedores:
 
@@ -253,41 +255,42 @@ Script para instalar herramientas en los contenedores core 5G:
 core5g_containers=(amf ausf nrf nssf pcf smf udm udr)
 
 for c in "${core5g_containers[@]}"; do
-    echo "Instalando herramientas en $c..."
-    docker exec -it "$c" sh -c "apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools"
+  echo "Instalando herramientas en $c..."
+  docker exec -it "$c" sh -c "apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools"
 done
 ```
 
-## Kubernetes Enviroment
+## Kubernetes Environment
 
-En las siguientes secciones se abordaran configuraciones relacionadas a un entorno de kubernetes, ambiente donde Aether fue diseñado para desplegarse
+En las siguientes secciones se abordarán configuraciones relacionadas a un entorno de Kubernetes, ambiente donde Aether fue diseñado para desplegarse.
 
 ## Aether OnRamp
 
 ### Imágenes de Docker
 
-Para desplegar los componentes de Aether actualizados, es necesario tener las imágenes de cada NF. Para ello se realizaron los siguientes pasos.
+Para desplegar los componentes de Aether actualizados, es necesario tener las imágenes de cada NF. Para ello se realizaron los siguientes pasos:
 
-1. En el repo de cada NF se editó el archivo `VERSION` y se cambió a un valor personalizado, en este caso fue: `v1.2.1-new-dev`
+1. En el repositorio de cada NF se editó el archivo `VERSION` y se cambió a un valor personalizado, en este caso fue: `v1.2.1-new-dev`.
 
 2. En el archivo `Makefile` se completaron las siguientes variables:
 ```makefile
 DOCKER_REGISTRY ?= 192.168.12.15:8083/
 DOCKER_REPOSITORY ?= omecproject/
 ```
-- `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus en los servidores de la empresa
-- `DOCKER_REPOSITORY` se configuró con nombre del repositorio por defecto de Aether SD-Core
 
-3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al rregistry. Para hacer el *push* es necesario primero loguearse en el Nexus con `docker login 192.168.12.15:8083`.
+- `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus en los servidores de la empresa.
+- `DOCKER_REPOSITORY` se configuró con el nombre del repositorio por defecto de Aether SD-Core.
 
-Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una version diferente o subir las imágenes a otro registry de Docker.
+3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al registry. Para hacer el *push* es necesario primero iniciar sesión en el Nexus con `docker login 192.168.12.15:8083`.
+
+Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una versión diferente o subir las imágenes a otro registry de Docker.
 
 
 ### Configuración del *values* de Helm
 
-El archivo de *values* de Helm se encuentra en la siguiente ruta, partiendo desde el directorio raíz del repositorio de Aether OnRamp: `/deps/5gc/roles/core/templates/sdcore-5g-values.yaml`
+El archivo de *values* de Helm se encuentra en la siguiente ruta, partiendo desde el directorio raíz del repositorio de Aether OnRamp: `/deps/5gc/roles/core/templates/sdcore-5g-values.yaml`.
 
-En este archivo se hicieron varias configuraciones.
+En este archivo se hicieron varias configuraciones:
 
 1. Se configuró el despliegue para que bajara las imágenes actualizadas del registry privado en Nexus de la siguiente forma:
 
@@ -344,41 +347,41 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 ```
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
-2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR) y fueron modificadas otras (WebUI, AMF, NRF, entre otras). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads). 
+2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR) y fueron modificadas otras (WebUI, AMF, NRF, entre otras). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads).
 
-3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** por el puerto `5001`. Es por eso que cada NF debe tener esta configuración.
+3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** por el puerto `5001`. Es por eso que cada NF debe tener esta configuración:
 ```yaml
  webuiUri: "http://webui:5001"
 ```
-El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io) que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definido en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso esta incluido en el despliegue del 5GC con Ansible.
+El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io), que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definido en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso está incluido en el despliegue del 5GC con Ansible.
 
 
 ## Kubernetes para desarrollo
 
 ### Requisitos
 
-- Ubuntu Server version 22.04 or later
+- Ubuntu Server versión 22.04 o superior
 - Docker
 - Kubernetes
-- Go version 1.24.4 or later
+- Go versión 1.24.4 o superior
 
 ---
 
-### Intalación del entorno de Kubernetes
+### Instalación del entorno de Kubernetes
 
 ---
 
-Para desplegar Aether debemos tener un entorno de kubernetes, en el cual utilizando los diferentes charts de helm desplegaremos los diferentes servicios
+Para desplegar Aether debemos tener un entorno de Kubernetes, en el cual utilizando los diferentes charts de Helm desplegaremos los diferentes servicios.
 
-####  1. **Preparar el Servidor**
+####  1. **Preparar el servidor**
 
-Asegúrate de que tu Server tenga al menos:
+Asegúrate de que tu servidor tenga al menos:
 
 - 2 CPUs (4 si vas a desplegar Aether)
--  4–8 GB de RAM (mejor con 8 GB para SD-Core)
--  20+ GB de almacenamiento
--  Sistema operativo Ubuntu Server 22.04 LTS
--  Seguridad: grupo de seguridad con puertos abiertos (SSH, 6443, 80, 443, 22, etc.)
+- 4–8 GB de RAM (mejor con 8 GB para SD-Core)
+- 20+ GB de almacenamiento
+- Sistema operativo Ubuntu Server 22.04 LTS
+- Seguridad: grupo de seguridad con puertos abiertos (SSH, 6443, 80, 443, 22, etc.)
 
 ---
 
@@ -869,8 +872,8 @@ En la consola:
 
 Hay varias formas:
 
-* Opción fácil: asignarlas a un **Internet Gateway**.
-* Opción del ejemplo: usar **NAT Gateway** en una subred pública.
+- Opción fácil: asignarlas a un **Internet Gateway**.
+- Opción del ejemplo: usar **NAT Gateway** en una subred pública.
 
 Ejemplo con NAT Gateway:
 
@@ -880,8 +883,8 @@ Ejemplo con NAT Gateway:
 4. **VPC → NAT Gateways → Create NAT Gateway** en la subred pública.
 5. En las **Route Tables** de `mgmt` y `core`:
 
-   * Añadir ruta `0.0.0.0/0` → hacia el **NAT Gateway** esto en las routes table de core
-   * Añadir ruta `0.0.0.0/0` → hacia el **Internet Gateway** esto en las routes table de mgmt
+   - Añadir ruta `0.0.0.0/0` → hacia el **NAT Gateway** esto en las routes table de core
+   - Añadir ruta `0.0.0.0/0` → hacia el **Internet Gateway** esto en las routes table de mgmt
 
 ---
 
@@ -889,7 +892,7 @@ Ejemplo con NAT Gateway:
 
 Si tienes gNB/eNB **on-premise**:
 
-* Ve a **Route Tables** de `access` y añade rutas hacia las redes de las estaciones base, apuntando al gateway correcto (VPN, Direct Connect, etc.).
+- Ve a **Route Tables** de `access` y añade rutas hacia las redes de las estaciones base, apuntando al gateway correcto (VPN, Direct Connect, etc.).
 
 ---
 
@@ -897,8 +900,8 @@ Si tienes gNB/eNB **on-premise**:
 
 1. **EC2 → Network Interfaces → Create network interface**.
 
-   * Para `access`: subnet `access`, sin IP pública.
-   * Para `core`: subnet `core`, sin IP pública.
+   - Para `access`: subnet `access`, sin IP pública.
+   - Para `core`: subnet `core`, sin IP pública.
 2. Guarda los **IDs** de cada ENI (los usarás luego para adjuntarlos a la EC2).
 
 ---
@@ -919,8 +922,8 @@ Esto es para que el tráfico hacia los UEs pase por la interfaz core.
 1. Ve a la **Route Table** de la subred pública o la que use el internet/NAT.
 2. Añade ruta:
 
-   * Destination: `SUBRED_UE_POOL` (ej. `10.22.0.128/26`)
-   * Target: **ENI core**.
+   - Destination: `SUBRED_UE_POOL` (ej. `10.22.0.128/26`)
+   - Target: **ENI core**.
 
 ---
 
@@ -942,19 +945,19 @@ Preparación de la instancia EC2
 
 1. En **Network settings**:
 
-   * **VPC**: selecciona la que creaste (`upf-vpc` o el nombre que tenga).
-   * **Subnet**: elige **solo la subred mgmt** (la que tiene acceso a Internet o NAT Gateway).
-   * **Auto-assign Public IP**: habilitado, para que puedas conectarte por SSH.
+   - **VPC**: selecciona la que creaste (`upf-vpc` o el nombre que tenga).
+   - **Subnet**: elige **solo la subred mgmt** (la que tiene acceso a Internet o NAT Gateway).
+   - **Auto-assign Public IP**: habilitado, para que puedas conectarte por SSH.
 2. En **Security group**:
 
-   * Asegúrate de permitir **SSH (TCP 22)** desde tu IP.
+   - Asegúrate de permitir **SSH (TCP 22)** desde tu IP.
 
 ---
 
-**3️⃣ Lanzar y conectarte**
+### 3️⃣ Lanzar y conectarte
 
-* Haz clic en **Launch instance**.
-* Conéctate por SSH a la IP pública:
+- Haz clic en **Launch instance**.
+- Conéctate por SSH a la IP pública:
 
 ```bash
 ssh -i tu_clave.pem ubuntu@IP_PUBLICA
@@ -964,28 +967,28 @@ ssh -i tu_clave.pem ubuntu@IP_PUBLICA
 
 **4️⃣ Crear y adjuntar las ENIs de `access` y `core`**
 
-**(Esto se hace después de que la instancia está corriendo)**
+Esto se hace después de que la instancia está corriendo
 
 1. Ve a **EC2 → Network Interfaces → Create network interface**. Esto se indico en los pasos anteriores
 
-   * **Name**: `eni-access`.
-   * **Subnet**: subred `access`.
+   - **Name**: `eni-access`.
+   - **Subnet**: subred `access`.
    * **Auto-assign Public IP**: desactivado (solo se necesita en `mgmt`).
-   * Crea otra igual pero para `core` (`eni-core`).
+   - Crea otra igual pero para `core` (`eni-core`).
 
 2. **Desactivar Source/Destination Check** en la ENI `core`:
 
-   * Selecciona la ENI `eni-core`.
-   * En **Actions → Change source/dest. check → Disable**.
+   - Selecciona la ENI `eni-core`.
+   - En **Actions → Change source/dest. check → Disable**.
 
 3. **Adjuntar las ENIs a la instancia**:
 
-   * En la ENI `eni-access`, ve a **Actions → Attach** y elige tu instancia.
-   * Repite para `eni-core`.
+   - En la ENI `eni-access`, ve a **Actions → Attach** y elige tu instancia.
+   - Repite para `eni-core`.
 
 ---
 
-**5️⃣ Verificar desde el SO**
+#### 5️⃣ Verificar desde el SO
 
 Dentro de la instancia, ejecuta:
 
@@ -995,9 +998,9 @@ ip addr
 
 Deberías ver:
 
-* `ens5` → interfaz de `mgmt` (con IP pública o detrás de NAT).
-* Otra interfaz para `access`.
-* Otra interfaz para `core`.
+- `ens5` → interfaz de `mgmt` (con IP pública o detrás de NAT).
+- Otra interfaz para `access`.
+- Otra interfaz para `core`.
 
 ---
 
@@ -1230,9 +1233,65 @@ sudo rm -rf $HOME/.config/helm
 sudo rm -rf $HOME/.local/share/helm
 ```
 
+## Ejemplos de desarrollo
 
+### NRF (NfProfile Update)
+
+El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación describiremos el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
+
+Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se deberia hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF de Aether que deberían utilizar esta nueva versión de openapi actualizada.
+
+Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y en releases más modernos se debe indicar el campo NfServiceList, este campo lo puede completar el NRF en el proceso de registro.
+
+#### Proceso de desarrollo
+
+1. Se actualizó el modelo NfProfile en el repositorio de Aether.
+
+Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de nostros openApiFiles/files estan todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el release 16 tiene todos los .yml organizados hasta el release 16. Lo puedes ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+
+En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
+
+- Java 11 o superior
+- Descargar el openapi-generator-cli.jar desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>
+- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar que se ha instalado correctamente.
+- Generar el openapi de go con los siguientes comandos:
+
+```bash
+java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio>   -g go   -o ./go-nrf-client
+```
+
+En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
+
+Para actualizar el NfProfile utilizamos el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs actualizamos el modelo manualmente, comprobando que solo se agregaran nuevas struct sin romper las anteriores definidas por Aether.
+
+Puedes visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
+![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
+
+2. Se creó un nuevo release de openapi con el modelo actualizado.
+
+Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se hizo un push con ese tag.
+
+3. Se especifica en cada NF de Aether que deben utilizar la nueva versión de openapi
+
+En cada NF de aether se agregaron las siguientes líneas en el archivo de los modulos de go:
+
+![alt text](imgs/image.png)
+
+Luego se hicieron builds de estas NF para testearlas en nuestros entornos de desarollo
+
+Por último se actualizó el NRF para que llenara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios los puede ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
+
+### WebUI Update
+
+El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta webui utilizando el la dirección y puerto que le asigne para este servicio.
+
+### AMF, SMF, NSSF update to release 2.0.0
+
+Estos componentes aún no tenían integrado nuevas funcionalidades como el polling http al webui para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, nosotros los hemos actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo release.
 
 ## Pruebas de simulación y trazas de logs de registro
+
+Utilizando nuestro entorno de desarrollo, pudimos comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla mejor como se llevo a cabo este proceso.
 
 #### Configuraciones previas
 
@@ -1478,14 +1537,15 @@ newgrp docker
 ```
 
 Docker-Compose:
+
 ```bash
 sudo wget -c https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-`uname -s`-`uname -m` -O /usr/local/bin/docker-compose; sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-
 #### Despliegue del UDM de Open5GS
 
 Clonar el siguiente repositorio para obtener todos los archivos necesarios:
+
 ```
 git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
 ```
@@ -1493,6 +1553,7 @@ git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
 Nota: Este repositorio tiene además configuraciones para el AUSF, el UDR y el Webui de Open5GS para probar la integración de estas NFs con Aether. Por el momento este informe solo estará enfocado al registro del UDM.
 
 Antes de desplegar el UDM de Open5GS se debe editar su archivo de configuración para indicarle la dirección de la URI del NRF de Aether. Dentro de la carpeta del repositorio clonado ejecutar el siguiente comando
+
 ```bash
 nano udm/udm.yaml
 ```
