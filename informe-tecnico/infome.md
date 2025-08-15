@@ -799,35 +799,34 @@ Para ejecutar el user-plane en una instancia EC2 de AWS, seguir los siguientes p
 
 1. **Requisitos de red (VPC prerequisites)**
 
-   * Crear una VPC con tres subredes: `mgmt`, `access` y `core`.
-   * Hacer accesibles a internet las subredes `mgmt` y `core`.
-   * Configurar rutas (incluyendo para eNB/gNB si están en on-premise).
-   * Crear interfaces de red (ENIs) para `access` y `core`, desactivar el *source/destination check* en `core` y añadir ruta para la subred de UEs.
+   - Crear una VPC con tres subredes: `mgmt`, `access` y `core`.
+   - Hacer accesibles a internet las subredes `mgmt` y `core`.
+   - Configurar rutas (incluyendo para eNB/gNB si están en on-premise).
+   - Crear interfaces de red (ENIs) para `access` y `core`, desactivar el *source/destination check* en `core` y añadir ruta para la subred de UEs.
 
 2. **Lanzar la instancia EC2**
 
-   * Usar un tipo con **ENA** habilitado (ej. `c5.2xlarge`) y AMI Ubuntu 20.04.
-   * Inicialmente conectar solo la subred `mgmt`, y luego añadir las ENIs de `access` y `core`.
+   - Usar un tipo con **ENA** habilitado (ej. `c5.2xlarge`) y AMI Ubuntu 20.04.
+   - Inicialmente conectar solo la subred `mgmt`, y luego añadir las ENIs de `access` y `core`.
 
 3. **Configurar el sistema operativo**
 
-   * Habilitar **HugePages de 1Gi** modificando GRUB.
-   * Cargar y configurar el driver **vfio-pci** con modo *unsafe IOMMU*.
-   * Asociar las interfaces `access` y `core` al driver vfio-pci usando `driverctl`.
+   - Habilitar **HugePages de 1Gi** modificando GRUB.
+   - Cargar y configurar el driver **vfio-pci** con modo *unsafe IOMMU*.
+   - Asociar las interfaces `access` y `core` al driver vfio-pci usando `driverctl`.
 
 4. **Configurar Kubernetes (K8S)**
 
-   * Instalar **Multus CNI**.
-   * Instalar y configurar el **SR-IOV device plugin** para las interfaces de `access` y `core` (asignadas por PCI).
-   * Verificar recursos disponibles: HugePages y dispositivos SR-IOV.
-   * Instalar el binario `vfioveth` en `/opt/cni/bin`.
+   - Instalar **Multus CNI**.
+   - Instalar y configurar el **SR-IOV device plugin** para las interfaces de `access` y `core` (asignadas por PCI).
+   - Verificar recursos disponibles: HugePages y dispositivos SR-IOV.
+   - Instalar el binario `vfioveth` en `/opt/cni/bin`.
 
 5. **Instalar BESS-UPF**
 
-   * Requiere helm chart con licencia de miembros ONF.
-   * Usar un `overriding-values.yaml` con configuración de subredes, direcciones IP, MAC y recursos SR-IOV.
-   * Desplegar con `helm install` y verificar que el pod `upf-0` esté en estado *Running*.
-
+   - Requiere helm chart con licencia de miembros ONF.
+   - Usar un `overriding-values.yaml` con configuración de subredes, direcciones IP, MAC y recursos SR-IOV.
+   - Desplegar con `helm install` y verificar que el pod `upf-0` esté en estado *Running*.
 
 #### Preparación para un entorno EC2 AWS
 
@@ -849,9 +848,9 @@ Preparación del VPC
 
 Necesitamos **tres subnets** dentro de la misma VPC:
 
-* **mgmt** → para administrar la instancia (acceso SSH, K8s API, etc.)
-* **access** → tráfico hacia/desde gNB/eNB
-* **core** → tráfico hacia el core de red (internet o N6)
+- **mgmt** → para administrar la instancia (acceso SSH, K8s API, etc.)
+- **access** → tráfico hacia/desde gNB/eNB
+- **core** → tráfico hacia el core de red (internet o N6)
 
 Ejemplo:
 
@@ -931,7 +930,7 @@ Preparación de la instancia EC2
 
 ---
 
-**1️⃣ Lanzar la instancia EC2**
+#### **1️⃣ Lanzar la instancia EC2**
 
 1. Ve a **AWS Console → EC2 → Launch instance**.
 2. **Name**: por ejemplo `ec2-server`.
@@ -941,7 +940,7 @@ Preparación de la instancia EC2
 
 ---
 
-**2️⃣ Configurar red inicial (solo `mgmt`)**
+#### **2️⃣ Configurar red inicial (solo `mgmt`)**
 
 1. En **Network settings**:
 
@@ -973,7 +972,7 @@ Esto se hace después de que la instancia está corriendo
 
    - **Name**: `eni-access`.
    - **Subnet**: subred `access`.
-   * **Auto-assign Public IP**: desactivado (solo se necesita en `mgmt`).
+   - **Auto-assign Public IP**: desactivado (solo se necesita en `mgmt`).
    - Crea otra igual pero para `core` (`eni-core`).
 
 2. **Desactivar Source/Destination Check** en la ENI `core`:
@@ -1298,6 +1297,7 @@ Utilizando nuestro entorno de desarrollo, pudimos comprobar el correcto funciona
 Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM. 
 
 `vars/main.yml`
+
 ```yml
 ###...otras configuraciones
 
@@ -1317,6 +1317,7 @@ ueransim:
 ```
 
 `host.ini`
+
 ```
 [all]
 node1 ansible_host=<aether_server_IP> ansible_user=<host_user>
