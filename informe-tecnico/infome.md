@@ -27,9 +27,9 @@
 
 ## Introducción
 
-Este informe técnico recopila todo lo realizado para tener un entorno de desarrollo que nos permita integrar nuevos cambios a los elementos presentados por Aether.
+Este informe técnico recopila todo lo realizado para tener un entorno de desarrollo que permita integrar nuevos cambios a los elementos presentados por Aether.
 
-Para trabajar según nuestras necesidades, hicimos forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
+Para trabajar según las necesidades del proyecto, se hicieron forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
 
 GitHub repository for the OMEC Project ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete SD-Core a cargas de trabajo RAN.
 
@@ -39,9 +39,9 @@ GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://gi
 
 Los forks se pueden encontrar en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
 
-En nuestro caso, editamos el CI para adecuarlo a nuestras necesidades.
+En este caso, se editó el CI para adecuarlo a las necesidades del proyecto.
 
-Al hacer forks, podemos contribuir en un futuro al proyecto.
+Al hacer forks, se podrá contribuir en un futuro al proyecto.
 
 Las imágenes de Docker se guardan en Docker Hub. Si se busca "network5gcore" en Docker Hub, deben aparecer las imágenes.
 
@@ -49,7 +49,7 @@ Las imágenes de Docker se guardan en Docker Hub. Si se busca "network5gcore" en
 
 ## Pasos iniciales
 
-Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando nuestra configuración para crear un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
+Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando configuraciones propias para crear un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
 
 ### Instalaciones necesarias
 
@@ -73,7 +73,7 @@ go version
 
 ### Clonar repositorios
 
-En nuestro entorno, ejecutar los siguientes comandos:
+Ejecutar los siguientes comandos para crear la carpeta principal del proyecto:
 
 ```bash
 cd ~
@@ -105,11 +105,11 @@ for repo in repos:
 python3 python_get_repos.py
 ```
 
-Después de que termine la ejecución del script, tendremos las siguientes carpetas:
+Después de que termine la ejecución del script, se tendrán las siguientes carpetas:
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Actualmente, al clonar los repositorios se clonará el repositorio utilFiles, en el cual se encuentran definidos varios de los archivos que mencionamos aquí. Para poder utilizar estos archivos, deberemos copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así los podremos utilizar sin problemas.
+Actualmente, al clonar los repositorios se clonará el repositorio utilFiles, en el cual se encuentran definidos varios de los archivos que se mencionan aquí. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así se podrán utilizar sin problemas.
 
 ### Construir componentes
 
@@ -178,15 +178,15 @@ Binario de cada uno de los componentes
 
 ## Ejecutar componentes individualmente
 
-Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, podemos hacer lo siguiente:
+Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, se puede hacer lo siguiente:
 
-1. Asegurarnos de que el componente que queremos ejecutar tenga su binario en la carpeta `bin`.
+1. Asegurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
 2. Abrir una terminal y navegar a la carpeta `bin` donde se encuentran los binarios de los componentes.
-3. Ejecutar el binario del componente deseado. Por ejemplo, si queremos ejecutar el componente `amf`, podemos usar el siguiente comando:
-
 ```bash
 cd ~/aether-forks/bin
 ```
+
+3. Ejecutar el binario del componente deseado. Por ejemplo, si queremos ejecutar el componente `amf`, podemos usar el siguiente comando:
 
 ```bash
 ./amf --cfg ~/aether-forks/configs_files/amfcfg.yaml
@@ -194,17 +194,17 @@ cd ~/aether-forks/bin
 
 Así para cada uno de los componentes que soporten una configuración inicial a través de un archivo YAML de configuración.
 
-Esto nos permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
+Esto permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
 
 ## Entorno de Docker
 
-Para crear un entorno de desarrollo utilizando Docker, podemos utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
+Para crear un entorno de desarrollo utilizando Docker, se puede utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
 
 En la carpeta `configs_files/` se deben colocar los archivos de configuración YAML para cada componente, como `amfcfg.yaml`, `ausfcfg.yaml`, etc. Estos archivos deben contener la configuración específica para cada componente.
 
 En el repositorio `utilFiles` actualmente hay una serie de docker-compose y scripts que levantan un entorno de Docker, según las configuraciones asociadas en `configs_files`.
 
-Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y comprobar los resultados en nuestro entorno.
+Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y en el cual se puedan comprobar los resultados .
 
 ## Comandos útiles
 
@@ -371,11 +371,11 @@ El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, 
 
 ---
 
-Para desplegar Aether debemos tener un entorno de Kubernetes, en el cual utilizando los diferentes charts de Helm desplegaremos los diferentes servicios.
+Para desplegar Aether se debe tener un entorno de Kubernetes, en el cual utilizando los diferentes charts de Helm se despliegan los diferentes servicios.
 
 ####  1. **Preparar el servidor**
 
-Asegúrate de que tu servidor tenga al menos:
+Requerimientos mínimos del servidor:
 
 - 2 CPUs (4 si vas a desplegar Aether)
 - 4–8 GB de RAM (mejor con 8 GB para SD-Core)
@@ -591,7 +591,7 @@ chmod 700 get_helm.sh
 
 #### Obtener y operar charts
 
-Aether proporciona una serie de charts de helm, los cuales podemos configurar segun nuestras necesidades. Estos charts los podemos encontrar en:
+Aether proporciona una serie de charts de helm, los cuales se pueden configurar segun las necesidadesdel proyecto. Estos charts se pueden encontrar en:
 
 [https://charts.aetherproject.org](https://charts.aetherproject.org)
 
@@ -613,7 +613,7 @@ SD-RAN: [https://github.com/onosproject/sdran-helm-charts](https://github.com/on
 
 SD-Core: [https://github.com/omec-project/sdcore-helm-charts](https://github.com/omec-project/sdcore-helm-charts).
 
-De estos repos hicimos repositorio para trabajar segun nuestras necesidades.
+De estos repos hicimos repositorio para trabajar segun las necesidades del proyecto.
 
 SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts).
 
@@ -683,7 +683,7 @@ sudo chmod +x build_linux.sh
 ./build_linux.sh
 ```
 
-Ahora ejecutar los siguientes comandos de helm para desplegar el core 5G. Deberemos de estar en el repo helm-charts para ejecutar estos comandos.
+Ahora ejecutar los siguientes comandos de helm para desplegar el core 5G. Se debe de estar en el repo helm-charts para ejecutar estos comandos.
 
 ```bash
 
@@ -709,7 +709,7 @@ cd ..
 cd ..
 ```
 
-El webui es un componente principal para el funcionamiento del core 5g de Aether, en este despliegue se puede retrasar su despliegue con frecuencia y provocar problemas en los demas componentes, para solucionar esto pasado un tiempo deberemos eliminar cada uno de los componentes del core para que el deployment los vuelva a reiniciar y ahora con el webui en funcionamiento las cosas funcionen mejor. Los siguientes comandos realizan esa acción.
+El webui es un componente principal para el funcionamiento del core 5g de Aether, en este despliegue se puede retrasar su despliegue con frecuencia y provocar problemas en los demas componentes, para solucionar esto pasado un tiempo se debe eliminar cada uno de los componentes del core para que el deployment los vuelva a reiniciar y ahora con el webui en funcionamiento las cosas funcionen mejor. Los siguientes comandos realizan esa acción.
 
 ```bash
 # Puedes usar un comando kubectl para listar todos los pods excepto el webui:
@@ -1236,7 +1236,7 @@ sudo rm -rf $HOME/.local/share/helm
 
 ### NRF (NfProfile Update)
 
-El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación describiremos el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
+El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
 
 Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se deberia hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF de Aether que deberían utilizar esta nueva versión de openapi actualizada.
 
@@ -1246,7 +1246,7 @@ Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y 
 
 1. Se actualizó el modelo NfProfile en el repositorio de Aether.
 
-Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de nostros openApiFiles/files estan todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el release 16 tiene todos los .yml organizados hasta el release 16. Lo puedes ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de  openApiFiles/files están todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el *Release* 16 tiene todos los .yml organizados hasta el *Release* 16. Se puede ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
 
 En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
 
@@ -1261,7 +1261,7 @@ java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio> 
 
 En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
 
-Para actualizar el NfProfile utilizamos el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs actualizamos el modelo manualmente, comprobando que solo se agregaran nuevas struct sin romper las anteriores definidas por Aether.
+Para actualizar el NfProfile se utilizó el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs se actualizó el modelo manualmente, comprobando que solo se agregaran nuevas *struct* sin romper las anteriores definidas por Aether.
 
 Puedes visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
 ![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
@@ -1276,21 +1276,21 @@ En cada NF de aether se agregaron las siguientes líneas en el archivo de los mo
 
 ![alt text](imgs/image.png)
 
-Luego se hicieron builds de estas NF para testearlas en nuestros entornos de desarollo
+Luego se hicieron builds de estas NF para testearlas en el entornos de desarollo
 
 Por último se actualizó el NRF para que llenara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios los puede ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
 
 ### WebUI Update
 
-El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta webui utilizando el la dirección y puerto que le asigne para este servicio.
+El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta WebUI utilizando el la dirección y puerto que le asigne para este servicio.
 
 ### AMF, SMF, NSSF update to release 2.0.0
 
-Estos componentes aún no tenían integrado nuevas funcionalidades como el polling http al webui para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, nosotros los hemos actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo release.
+Estos componentes aún no tenían integrado nuevas funcionalidades como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, se han actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo *release*.
 
 ## Pruebas de simulación y trazas de logs de registro
 
-Utilizando nuestro entorno de desarrollo, pudimos comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla mejor como se llevo a cabo este proceso.
+Utilizando el entorno de desarrollo, se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla como se llevo a cabo este proceso.
 
 #### Configuraciones previas
 
