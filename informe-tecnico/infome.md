@@ -108,6 +108,7 @@ python3 python_get_repos.py
 Después de que termine la ejecución del script, se obtendrán las siguientes carpetas:
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
+
 Figura 1. Carpetas de cada repositorios del proyecto.
 
 Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles`, donde se definen varios de los archivos mencionados en esta sección del informe. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así se podrán utilizar sin problemas.
@@ -174,6 +175,7 @@ Este script copiará todos los builds de Go en una carpeta llamada `bin`.
 ```
 
 ![Binario de cada uno de los componentes](imgs/{BBEA4130-7110-4E58-8C59-AC1895312AAC}.png)
+
 Figura 2. Carpeta `bin` con las carpetas correspondientes a cada binario compilado con Go.
 
 
@@ -1716,6 +1718,13 @@ El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en s
 08/13 19:57:51.610: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
+
+
+El proceso anterior se describe también en la siguiente figura:
+![Registro del UDM (Open5GS) en el NRF (Aether)](imgs/registo-del-UDM(Open5GS)-en-NRF(Aether).png)
+
+Figura 6. Registro del UDM (Open5GS) en el NRF (Aether)
+
 
 ## Evaluación final y recomendaciones
 
