@@ -578,6 +578,7 @@ kubectl get pods -A
 Debes ver algo como esto:
 
 ![alt text](imgs/{70E4BAB7-F16D-481C-AF22-A3AF4EC88405}.png)
+
 Figura 3. Pods de Kubernetes en estado **Running**
 
 ### Trabajando con Helm
