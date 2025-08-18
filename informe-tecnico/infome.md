@@ -29,7 +29,7 @@
 
 Este informe técnico recopila todo lo realizado para tener un entorno de desarrollo que permita integrar nuevos cambios a los elementos presentados por Aether.
 
-Para trabajar según las necesidades del proyecto, se hicieron forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
+Para cumplir con las necesidades del proyecto, se hicieron forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
 
 GitHub repository for the OMEC Project ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete SD-Core a cargas de trabajo RAN.
 
@@ -39,11 +39,11 @@ GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://gi
 
 Los forks se pueden encontrar en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
 
-En este caso, se editó el CI para adecuarlo a las necesidades del proyecto.
+En este caso, se editó la Integración Continua (CI) para adecuarlo a las necesidades del proyecto.
 
 Al hacer forks, se podrá contribuir en un futuro al proyecto.
 
-Las imágenes de Docker se guardan en Docker Hub. Si se busca "network5gcore" en Docker Hub, deben aparecer las imágenes.
+Las imágenes de Docker se guardan en Docker Hub, se pueden encontrar buscando 'network5gcore' en la plataforma.
 
 ---
 
@@ -105,11 +105,11 @@ for repo in repos:
 python3 python_get_repos.py
 ```
 
-Después de que termine la ejecución del script, se tendrán las siguientes carpetas:
+Después de que termine la ejecución del script, se obtendrán las siguientes carpetas:
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Actualmente, al clonar los repositorios se clonará el repositorio utilFiles, en el cual se encuentran definidos varios de los archivos que se mencionan aquí. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así se podrán utilizar sin problemas.
+Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles`, donde se definen varios de los archivos mencionados en esta sección del informe. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así se podrán utilizar sin problemas.
 
 ### Construir componentes
 
@@ -166,7 +166,7 @@ for dir in "$current_dir"/* ; do
 done
 ```
 
-Este script copiará todos los builds de Go en una carpeta llamada bin.
+Este script copiará todos los builds de Go en una carpeta llamada `bin`.
 
 ```bash
 ./get_builds.sh
@@ -178,21 +178,21 @@ Binario de cada uno de los componentes
 
 ## Ejecutar componentes individualmente
 
-Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, se puede hacer lo siguiente:
+Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, se proceder de la siguiente manera:
 
-1. Asegurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
+1. Se debe segurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
 2. Abrir una terminal y navegar a la carpeta `bin` donde se encuentran los binarios de los componentes.
 ```bash
 cd ~/aether-forks/bin
 ```
 
-3. Ejecutar el binario del componente deseado. Por ejemplo, si queremos ejecutar el componente `amf`, podemos usar el siguiente comando:
+3. Ejecutar el binario del componente deseado. Por ejemplo, si se quiere ejecutar el componente `amf`, se usa el siguiente comando:
 
 ```bash
 ./amf --cfg ~/aether-forks/configs_files/amfcfg.yaml
 ```
 
-Así para cada uno de los componentes que soporten una configuración inicial a través de un archivo YAML de configuración.
+Este procedimiento se aplica a cada uno de los componentes que soporten una configuración inicial a través de un archivo de configuración YAML
 
 Esto permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
 
@@ -268,7 +268,7 @@ En las siguientes secciones se abordarán configuraciones relacionadas a un ento
 
 ### Imágenes de Docker
 
-Para desplegar los componentes de Aether actualizados, es necesario tener las imágenes de cada NF. Para ello se realizaron los siguientes pasos:
+Para desplegar los componentes de Aether actualizados, se requiere disponer de las imágenes de cada NF. Para ello, se realizaron los siguientes pasos:
 
 1. En el repositorio de cada NF se editó el archivo `VERSION` y se cambió a un valor personalizado, en este caso fue: `v1.2.1-new-dev`.
 
@@ -283,7 +283,8 @@ DOCKER_REPOSITORY ?= omecproject/
 
 3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al registry. Para hacer el *push* es necesario primero iniciar sesión en el Nexus con `docker login 192.168.12.15:8083`.
 
-Todos estos pasos pueden adaptarse según la conveniencia del usuario, usar una versión diferente o subir las imágenes a otro registry de Docker.
+
+Todos estos pasos pueden adaptarse según la conveniencia de cada usuario, como usar una versión diferente o subir las imágenes a otro registry de Docker.
 
 
 ### Configuración del *values* de Helm
@@ -292,7 +293,7 @@ El archivo de *values* de Helm se encuentra en la siguiente ruta, partiendo desd
 
 En este archivo se hicieron varias configuraciones:
 
-1. Se configuró el despliegue para que bajara las imágenes actualizadas del registry privado en Nexus de la siguiente forma:
+1. El despliegue se configuró para descargar las imágenes actualizadas del *registry* privado en Nexus de la siguiente manera:
 
 ```yaml
 5g-control-plane:
@@ -347,13 +348,13 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 ```
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
-2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR) y fueron modificadas otras (WebUI, AMF, NRF, entre otras). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads).
+2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR, NSSF, PCF) y fueron modificadas otras (WebUI, AMF, NRF, SMF). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads).
 
-3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** por el puerto `5001`. Es por eso que cada NF debe tener esta configuración:
+3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** a través del puerto `5001`. Es por eso que cada NF debe tener esta configuración:
 ```yaml
  webuiUri: "http://webui:5001"
 ```
-El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io), que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definido en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso está incluido en el despliegue del 5GC con Ansible.
+El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io), que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definida en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso está incluido en el despliegue del 5GC con Ansible.
 
 
 ## Kubernetes para desarrollo
@@ -375,7 +376,7 @@ Para desplegar Aether se debe tener un entorno de Kubernetes, en el cual utiliza
 
 ####  1. **Preparar el servidor**
 
-Requerimientos mínimos del servidor:
+Requisitos mínimos del servidor:
 
 - 2 CPUs (4 si vas a desplegar Aether)
 - 4–8 GB de RAM (mejor con 8 GB para SD-Core)
@@ -456,77 +457,75 @@ sudo kubeadm init \
 
 ```
 
->  Esto instalará un clúster con Calico/Flannel-compatible pod CIDR.
+Esto instalará un clúster con Calico/Flannel-compatible pod CIDR.
 
-Si presentar problemas relacionados con que no encuentra el containerd.sock, puedes hacer lo siguiente:
+Si se presentan problemas relacionados con que no se encuentra el `containerd.sock`, se puede hacer lo siguiente:
 
-Asegúrate de que containerd esté instalado
+Asegurar que containerd esté instalado:
 
 ```bash
 which containerd
 ```
 
-Debe devolver algo como:
+- Debe devolver algo como:
 
 ```bash
 /usr/bin/containerd
 ```
 
-Asegúrate de que containerd esté corriendo
+Aseurar que containerd esté corriendo
 
 ```bash
 sudo systemctl status containerd
 ```
 
-Si no está corriendo, intenta:
+Si no está corriendo:
 
 ```bash
 sudo systemctl start containerd
 ```
 
-Verifica que el archivo de configuración de containerd tenga habilitado el CRI
+Verificar que el archivo de configuración de containerd tenga habilitado el CRI
 
-Ejecuta:
+Primero ejecutar:
 
 ```bash
 sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 ```
 
-Luego edita el archivo:
+Luego editar el archivo:
 
 ```bash
 sudo nano /etc/containerd/config.toml
 ```
 
-Busca esta sección:
+Buscar esta sección:
 
 ```toml
 [plugins."io.containerd.grpc.v1.cri"]
 ```
 
-> Asegúrate de que no esté comentada y que esté habilitada. También asegúrate de que tenga:
+Verififcar de que no esté comentada y que esté habilitada. También que tenga:
 
 ```toml
   [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
     SystemdCgroup = true
 ```
 
-Reinicia containerd después de los cambios
+Reiniciar containerd después de los cambios:
 
 ```bash
 sudo systemctl restart containerd
 ```
 
-Verifica el socket
-Asegúrate de que el socket exista:
+Verificar que el socket exista:
 
 ```bash
 ls -l /var/run/containerd/containerd.sock
 ```
+- Debe aparecer como archivo tipo socket.
 
-> Debe aparecer como archivo tipo socket.
-
-Vuelve a intentar la inicialización
+Volver a intentar la inicialización:
 
 ```bash
 sudo kubeadm init \
@@ -591,7 +590,7 @@ chmod 700 get_helm.sh
 
 #### Obtener y operar charts
 
-Aether proporciona una serie de charts de helm, los cuales se pueden configurar segun las necesidadesdel proyecto. Estos charts se pueden encontrar en:
+Aether proporciona una serie de charts de helm, los cuales se pueden configurar según las necesidadesdel proyecto. Estos charts se pueden encontrar en:
 
 [https://charts.aetherproject.org](https://charts.aetherproject.org)
 
@@ -1092,7 +1091,7 @@ $ ls -l /dev/vfio/
 
 Configurando k8s
 
-La instalación de Kubernetes (K8S) está fuera del alcance de esta guía. Una vez que K8S esté listo en la máquina virtual, deberás instalar `Multus` y `sriov-device-plugin`.
+La instalación de Kubernetes (K8S) está fuera del alcance de esta guía. Una vez que K8S esté listo en la máquina virtual, se debe instalar `Multus` y `sriov-device-plugin`.
 
 ```bash
 # Install Multus
@@ -1459,12 +1458,12 @@ ip a
 
 #### Cambio en la configuracion del *service* `nrf`.
 
-Para que el UDM pueda acceder el puerto del *service* del NRF es necesario cambiar su tipo a `NodePort`. Esto se puede hacer con las siguientes instrucciones:
+Para que el UDM pueda acceder el puerto del *service* del NRF, es necesario cambiar su tipo a `NodePort`. Esto se puede hacer con las siguientes instrucciones:
 
 ```bash
 kubebctl edit svc nrf -n aether-5gc
 ```
-- Comando para editar el `svc nrf` del *namespace* `aether-5gc`
+- Comando para editar el service del `nrf` en el *namespace* `aether-5gc`
 
 Salida esperada:
 ```yaml
@@ -1516,10 +1515,10 @@ Se debe cambiar el campo `spec.type` a `NodePort`.
 
 
 > [!NOTE] Nota Importante
-> Este cambio se realiza "en caliente" luego de que esta desplegado todo el cluster. Si por algún motivo se reinstala Aether este cambio se sobreescribe por su configuración original y es necesario cambiarlo nuevamente.
+> Este cambio se realiza "en caliente" luego de que esta desplegado todo el cluster. Si por algún motivo se reinstala Aether este cambio se sobreescribirá por su configuración original y será necesario realizarlo nuevamente.
 
 
-Luego de hacer el cambio de configuración en el *service* del NRF si se ejecuta el comando `kubectl get svc -n aether-5gc` se podrá observar como el *service* del NRF tiene un puerto mapeado.
+Después de realizar el cambio de configuración en el *service* del NRF, al ejecutar el comando `kubectl get svc -n aether-5gc`, se podrá observar que el servicio del NRF tiene un puerto mapeado.
 
 
 #### Instalación de Docker y Docker Compose
@@ -1551,15 +1550,17 @@ Clonar el siguiente repositorio para obtener todos los archivos necesarios:
 git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
 ```
 
-Nota: Este repositorio tiene además configuraciones para el AUSF, el UDR y el Webui de Open5GS para probar la integración de estas NFs con Aether. Por el momento este informe solo estará enfocado al registro del UDM.
+Nota: Este repositorio también incluye configuraciones para el AUSF, el UDR y el Webui de Open5GS para probar la integración de estas NFs con Aether. Por el momento este informe solo estará enfocado en el registro del UDM.
 
-Antes de desplegar el UDM de Open5GS se debe editar su archivo de configuración para indicarle la dirección de la URI del NRF de Aether. Dentro de la carpeta del repositorio clonado ejecutar el siguiente comando
+
+
+Antes de desplegar el UDM de Open5GS se debe editar su archivo de configuración para indicar la dirección de la URI del NRF de Aether. Dentro de la carpeta del repositorio clonado ejecutar el siguiente comando
 
 ```bash
 nano udm/udm.yaml
 ```
 
-Se debe cambiar la dirección de `udm.sbi.client.nrf.uri` por la dirección IP del server y el puerto en el que se mapea el *service* del NRF de Aether. A continuación se muestra un ejemplo:
+Se debe cambiar la dirección de `udm.sbi.client.nrf.uri` por la dirección IP del servidor y el puerto en el que se mapea el *service* del NRF de Aether. A continuación se muestra un ejemplo:
 
 ```yaml
 logger:
@@ -1630,12 +1631,10 @@ Open5GS daemon v2.7.5-24-g8e286b6
 08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
 
-En la línea
+En la siguiente línea se puede ver el resultado del registro del UDM en el NRF de Aether.
 ```
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
-Se puede ver el resultado del registro del UDM en el NRF de Aether.
-
 
 
 Los logs del NRF se pueden obtener con el comando:
@@ -1665,7 +1664,7 @@ Salida esperada:
 ```
 
 
-En estos logs se puede ver la llegada de la solititud de registro del UDM de Open5GS:
+En esta línea se puede ver la llegada de la solititud de registro del UDM de Open5GS:
 ```logs-NRF
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
@@ -1677,7 +1676,7 @@ Se activa el procedimiento de registro:
 ```
 
 
-Se obtienen las configuraciones de PLMN del `webconsole` ya que no fueron provistas por el NF nuevo (UDM)
+Se obtienen las configuraciones de PLMN del `webconsole` ya que no fueron proporcionadas por la nueva NF (UDM)
 ```logs-NRF
 2025-08-13T19:57:51.601Z	WARN	context/management_data.go:73	PLMN config not provided by NF, using supported PLMNs from webconsole	{"component": "NRF", "category": "MGMT"}
 2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:78	Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}]	{"component": "NRF", "category": "MGMT"}
@@ -1696,13 +1695,13 @@ Registro exitoso:
 ```
 
 
-Luego del registro el NRF recibe una petición por parte del UDM para conocer otras NFs del Core:
+Luego del registro, el NRF recibe una petición por parte del UDM para conocer otras NFs del Core:
 ```logs-NRF
 2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:123	Handle GetNFInstancesRequest	{"component": "NRF", "category": "MGMT"}
 ```
 
 
-El NRF de Aether encuentra un error (Error in string conversion: 0) al procesar la petición de descubrimiento del UDM. Como resultado, responde al UDM con un error **400 Bad Request**.
+El NRF de Aether encuentra un error (`Error in string conversion: 0`) al procesar la petición de descubrimiento del UDM. Como resultado, responde al UDM con un error **400 Bad Request**.
 ```logs-NRF
 2025-08-13T19:57:51.609Z	ERROR	producer/nf_management.go:127	Error in string conversion:  0	{"component": "NRF", "category": "MGMT"}
 ```
