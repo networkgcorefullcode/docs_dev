@@ -622,13 +622,13 @@ Ejecutar los siguientes comandos:
 Opcionales:
 
 ```bash
-helm repo add stable https://charts.helm.sh/stable                        
-helm repo add cord https://charts.opencord.org                          
-helm repo add atomix https://charts.atomix.io                             
-helm repo add onosproject https://charts.onosproject.org                       
-helm repo add sdran https://sdrancharts.onosproject.org                  
-helm repo add aether https://charts.aetherproject.org                     
-helm repo add cetic https://cetic.github.io/helm-charts                  
+helm repo add stable https://charts.helm.sh/stable
+helm repo add cord https://charts.opencord.org
+helm repo add atomix https://charts.atomix.io
+helm repo add onosproject https://charts.onosproject.org
+helm repo add sdran https://sdrancharts.onosproject.org
+helm repo add aether https://charts.aetherproject.org
+helm repo add cetic https://cetic.github.io/helm-charts
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 
@@ -1043,8 +1043,8 @@ $ cat /sys/module/vfio/parameters/enable_unsafe_noiommu_mode
 # Y
 ```
 
-Por último, asocia las interfaces `access` y `core` al controlador vfio.  
-Antes de continuar, toma nota de las direcciones MAC de las dos ENIs, ya sea desde el panel de EC2 o usando el comando `aws ec2 describe-network-interfaces`.  
+Por último, asocia las interfaces `access` y `core` al controlador vfio.
+Antes de continuar, toma nota de las direcciones MAC de las dos ENIs, ya sea desde el panel de EC2 o usando el comando `aws ec2 describe-network-interfaces`.
 Estas direcciones MAC son necesarias para identificar la dirección PCI de cada interfaz.
 
 ```bash
@@ -1294,7 +1294,7 @@ Utilizando nuestro entorno de desarrollo, pudimos comprobar el correcto funciona
 
 #### Configuraciones previas
 
-Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM. 
+Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM.
 
 `vars/main.yml`
 
@@ -1512,7 +1512,7 @@ status:
 ```
 
 
-Se debe cambiar el campo `spec.type` a `NodePort`. 
+Se debe cambiar el campo `spec.type` a `NodePort`.
 
 
 > [!NOTE] Nota Importante
@@ -1526,7 +1526,7 @@ Luego de hacer el cambio de configuración en el *service* del NRF si se ejecuta
 
 Docker:
 ```bash
-sudo apt update 
+sudo apt update
 sudo apt install -y docker.io
 ```
 
@@ -1630,7 +1630,7 @@ Open5GS daemon v2.7.5-24-g8e286b6
 08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
 
-En la línea 
+En la línea
 ```
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
@@ -1715,3 +1715,7 @@ El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en s
 08/13 19:57:51.610: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
+
+## Evaluación final y recomendaciones
+
+Con las modificaciones realizadas en el código fuente de Aether SD-Core se logró registrar un UDM de terceros (en este caso, el UDM de Open5GS) en el NRF de Aether. Este procedimiento fue validado mediante evidencias en los registros tanto del UDM como del NRF. Sin embargo, tras el registro se presentaron fallos de interoperabilidad entre los componentes. Resolver estos problemas requiere continuar modificando el código del NRF y de otros servicios relacionados para alcanzar una funcionalidad completa del UDM de terceros. No obstante, este esfuerzo no resulta eficiente en el caso del UDM de Open5GS, ya que no será el utilizado en un entorno de producción, lo que podría generar nuevas incompatibilidades con el UDM de ETECSA, que es el componente objetivo con el cual se busca la interoperabilidad real.
