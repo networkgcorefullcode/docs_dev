@@ -93,7 +93,7 @@ Copiar el siguiente código (para clonar todos los repositorios rápidamente):
 import requests
 import os
 
-user = "networkgcorefullcode"  # Reemplaza con el nombre de usuario
+user = "networkgcorefullcode"  # Reemplaza con el nombre de usuario u organización
 url = f"https://api.github.com/users/{user}/repos?per_page=100"
 repos = requests.get(url).json()
 
@@ -183,8 +183,9 @@ Figura 2. Carpeta `bin` con las carpetas correspondientes a cada binario compila
 
 Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, se proceder de la siguiente manera:
 
-1. Se debe segurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
+1. Se debe asegurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
 2. Abrir una terminal y navegar a la carpeta `bin` donde se encuentran los binarios de los componentes.
+
 ```bash
 cd ~/aether-forks/bin
 ```
@@ -207,7 +208,7 @@ En la carpeta `configs_files/` se deben colocar los archivos de configuración Y
 
 En el repositorio `utilFiles` actualmente hay una serie de docker-compose y scripts que levantan un entorno de Docker, según las configuraciones asociadas en `configs_files`.
 
-Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y en el cual se puedan comprobar los resultados .
+Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y en el cual se puedan comprobar los resultados, todo esto utilizando docker.
 
 ## Comandos útiles
 
@@ -358,7 +359,6 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
  webuiUri: "http://webui:5001"
 ```
 El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io), que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definida en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso está incluido en el despliegue del 5GC con Ansible.
-
 
 ## Kubernetes para desarrollo
 
@@ -799,6 +799,47 @@ Puertos de los servicios
 | webui              | 30001  | Interfaz para el Webui                    |
 | mongodb-express    | 30081  | Interfaz web para interactuar con mongodb |
 
+### Comandos para eliminar kubernetes
+
+```bash
+kubectl delete -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
+
+kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+
+kubectl delete -f https://raw.githubusercontent.com/k8snetworkplumbingwg/sriov-network-device-plugin/v3.3/deployments/k8s-v1.16/sriovdp-daemonset.yaml
+
+kubectl delete -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+sudo systemctl stop kubelet
+sudo systemctl stop docker
+
+sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
+sudo apt-get autoremove
+
+# Reiniciar la pc en este paso
+sudo rm -rf ~/.kube
+sudo rm -rf /etc/kubernetes/
+sudo rm -rf /var/lib/etcd/
+sudo rm -rf /var/lib/kubelet/
+sudo rm -rf /var/lib/dockershim/
+sudo rm -rf /var/run/kubernetes/
+sudo rm -rf /etc/cni/
+sudo rm -rf /opt/cni/
+sudo rm -rf /opt/local-path-provisioner
+
+sudo docker system prune -a --volumes
+
+kubectl version
+# Debe decir comando no encontrado
+
+kubeadm version
+# Debe decir comando no encontrado
+
+sudo rm -rf $HOME/.cache/helm
+sudo rm -rf $HOME/.config/helm
+sudo rm -rf $HOME/.local/share/helm
+```
+
 Para ejecutar el user-plane en una instancia EC2 de AWS, seguir los siguientes pasos
 
 1. **Requisitos de red (VPC prerequisites)**
@@ -1201,39 +1242,6 @@ $ helm install -n bess-upf bess-upf [path/to/helm/chart] -f overriding-values.ya
 $ kubectl get po -n bess-upf
 # NAME    READY   STATUS    RESTARTS   AGE
 # upf-0   4/4     Running   0          41h
-```
-
-### Comandos para eliminar kubernetes
-
-```bash
-sudo systemctl stop kubelet
-sudo systemctl stop docker
-
-sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
-sudo apt-get autoremove
-
-# Reiniciar la pc en este paso
-sudo rm -rf ~/.kube
-sudo rm -rf /etc/kubernetes/
-sudo rm -rf /var/lib/etcd/
-sudo rm -rf /var/lib/kubelet/
-sudo rm -rf /var/lib/dockershim/
-sudo rm -rf /var/run/kubernetes/
-sudo rm -rf /etc/cni/
-sudo rm -rf /opt/cni/
-sudo rm -rf /opt/local-path-provisioner
-
-sudo docker system prune -a --volumes
-
-kubectl version
-# Debe decir comando no encontrado
-
-kubeadm version
-# Debe decir comando no encontrado
-
-sudo rm -rf $HOME/.cache/helm
-sudo rm -rf $HOME/.config/helm
-sudo rm -rf $HOME/.local/share/helm
 ```
 
 ## Ejemplos de desarrollo
