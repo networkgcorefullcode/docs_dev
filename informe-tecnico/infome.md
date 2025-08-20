@@ -1362,7 +1362,7 @@ ueransim:
 
 `host.ini`
 
-```
+```bash
 [all]
 node1 ansible_host=<aether_server_IP> ansible_user=<host_user>
 ansible_ssh_private_key_file=<path_to_ssh_private_key>
@@ -1425,7 +1425,7 @@ Para simular la `gnb`:
 
 Resultado esperado del comando anterior:
 
-```
+```bash
 UERANSIM v3.2.7
 [2025-08-13 15:55:46.882] [sctp] [info] Trying to establish SCTP connection... (192.168.12.11:38412)
 [2025-08-13 15:55:46.921] [sctp] [info] SCTP connection established (192.168.12.11:38412)
@@ -1454,7 +1454,7 @@ Para simular el UE:
 
 Resultado esperado del comando anterior:
 
-```
+```bash
 UERANSIM v3.2.7
 [2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
 [2025-08-13 15:56:12.658] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
@@ -1588,7 +1588,7 @@ sudo wget -c https://github.com/docker/compose/releases/download/v2.27.1/docker-
 
 Clonar el siguiente repositorio para obtener todos los archivos necesarios:
 
-```
+```bash
 git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
 ```
 
@@ -1673,7 +1673,7 @@ Open5GS daemon v2.7.5-24-g8e286b6
 
 En la siguiente línea se puede ver el resultado del registro del UDM en el NRF de Aether.
 
-```
+```bash
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
 
