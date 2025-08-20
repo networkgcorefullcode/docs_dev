@@ -27,29 +27,27 @@
 
 ## Introducción
 
-Este informe técnico recopila todo lo realizado para tener un entorno de desarrollo que permita integrar nuevos cambios a los elementos presentados por Aether.
+Este informe técnico recopila todo lo realizado para disponer de un entorno de desarrollo que permita integrar nuevos cambios a los elementos presentados por Aether.
 
-Para cumplir con las necesidades del proyecto, se hicieron forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en los siguientes enlaces:
+Para cumplir con los requisitos del proyecto, se realizaron forks de algunos repositorios de Aether, los cuales se pueden consultar en los siguientes enlaces:
 
-GitHub repository for the OMEC Project ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete SD-Core a cargas de trabajo RAN.
+- Repositorio de GitHub para el proyecto OMEC ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete a SD-Core a cargas de trabajo RAN.
+- Repositorio de GitHub para el proyecto ONOS ([https://github.com/onosproject](https://github.com/onosproject)): Microservicios para SD-RAN y ROC, además de los modelos YANG utilizados para generar la API de Aether.
+- Repositorio de GitHub para la ONF ([https://github.com/opennetworkinglab](https://github.com/opennetworkinglab)): Documentación de OnRamp y playbooks para el despliegue de Aether.
 
-GitHub repository for the ONOS Project ([https://github.com/onosproject](https://github.com/onosproject)): Microservicios para SD-RAN y ROC, además de los modelos YANG utilizados para generar la API de Aether.
+Los forks se encuentran disponibles en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
 
-GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://github.com/opennetworkinglab) — Documentación de OnRamp y playbooks para desplegar Aether.
+En este caso, se editó la Integración Continua (CI) para adaptarla a las necesidades del proyecto.
 
-Los forks se pueden encontrar en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
+Al realizar forks, será posible contribuir en el futuro al proyecto original.
 
-En este caso, se editó la Integración Continua (CI) para adecuarlo a las necesidades del proyecto.
-
-Al hacer forks, se podrá contribuir en un futuro al proyecto.
-
-Las imágenes de Docker se guardan en Docker Hub, se pueden encontrar buscando 'network5gcore' en la plataforma.
+Las imágenes de Docker se almacenan en Docker Hub y pueden encontrarse buscando 'network5gcore' en la plataforma.
 
 ---
 
 ## Pasos iniciales
 
-Objetivo: construir las imágenes de cada uno de los componentes de Aether, utilizando configuraciones propias para crear un entorno válido para el desarrollo. Hacer ese entorno utilizando solo Docker.
+Objetivo: Construir las imágenes de cada uno de los componentes de Aether, utilizando configuraciones propias para crear un entorno válido para el desarrollo. El entorno debe ser implementado únicamente con Docker.
 
 ### Instalaciones necesarias
 
@@ -105,13 +103,13 @@ for repo in repos:
 python3 python_get_repos.py
 ```
 
-Después de que termine la ejecución del script, se obtendrán las siguientes carpetas:
+Después de que finalice la ejecución del script, se obtendrán las siguientes carpetas:
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Figura 1. Carpetas de cada repositorios del proyecto.
+Figura 1. Carpetas de cada repositorio del proyecto.
 
-Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles`, donde se definen varios de los archivos mencionados en esta sección del informe. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. Así se podrán utilizar sin problemas.
+Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles`, donde se definen varios de los archivos mencionados en esta sección del informe. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. De esta manera, podrán utilizarse sin inconvenientes.
 
 ### Construir componentes
 
@@ -178,37 +176,36 @@ Este script copiará todos los builds de Go en una carpeta llamada `bin`.
 
 Figura 2. Carpeta `bin` con las carpetas correspondientes a cada binario compilado con Go.
 
-
 ## Ejecutar componentes individualmente
 
-Para ejecutar los componentes individualmente y hacer pruebas en cada uno de ellos, se proceder de la siguiente manera:
+Para ejecutar los componentes individualmente y realizar pruebas en cada uno de ellos, se debe proceder de la siguiente manera:
 
-1. Se debe asegurar que el componente que se quiere ejecutar tenga su binario en la carpeta `bin`.
-2. Abrir una terminal y navegar a la carpeta `bin` donde se encuentran los binarios de los componentes.
+1. Se debe asegurar que el componente que se desea ejecutar tenga su binario en la carpeta `bin`.
+2. Abrir una terminal y navegar a la carpeta `bin`, donde se encuentran los binarios de los componentes.
 
 ```bash
 cd ~/aether-forks/bin
 ```
 
-3. Ejecutar el binario del componente deseado. Por ejemplo, si se quiere ejecutar el componente `amf`, se usa el siguiente comando:
+3. Ejecutar el binario del componente deseado. Por ejemplo, si se requiere ejecutar el componente `amf`, se utiliza el siguiente comando:
 
 ```bash
 ./amf --cfg ~/aether-forks/configs_files/amfcfg.yaml
 ```
 
-Este procedimiento se aplica a cada uno de los componentes que soporten una configuración inicial a través de un archivo de configuración YAML
+Este procedimiento se aplica a cada uno de los componentes que soporten una configuración inicial a través de un archivo de configuración YAML.
 
-Esto permitirá probar cada componente de forma individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo como Docker o Kubernetes. Es especialmente útil para el desarrollo y la depuración de cada componente por separado.
+De esta forma, es posible probar cada componente de manera individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo, como Docker o Kubernetes. Esta práctica resulta especialmente útil para el desarrollo y la depuración de cada componente por separado.
 
 ## Entorno de Docker
 
-Para crear un entorno de desarrollo utilizando Docker, se puede utilizar un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación se muestra un ejemplo básico de cómo podría ser este archivo:
+Para crear un entorno de desarrollo utilizando Docker, se puede emplear un archivo `docker-compose.yaml` que defina los servicios necesarios para ejecutar los componentes de Aether. A continuación, se muestra un ejemplo básico de cómo podría estructurarse este archivo:
 
-En la carpeta `configs_files/` se deben colocar los archivos de configuración YAML para cada componente, como `amfcfg.yaml`, `ausfcfg.yaml`, etc. Estos archivos deben contener la configuración específica para cada componente.
+En la carpeta `configs_files/` deben ubicarse los archivos de configuración YAML para cada componente, como `amfcfg.yaml`, `ausfcfg.yaml`, etc. Estos archivos deben contener la configuración específica de cada componente.
 
-En el repositorio `utilFiles` actualmente hay una serie de docker-compose y scripts que levantan un entorno de Docker, según las configuraciones asociadas en `configs_files`.
+En el repositorio `utilFiles` existe actualmente una serie de archivos docker-compose y scripts que permiten levantar un entorno de Docker, según las configuraciones asociadas en `configs_files`.
 
-Hasta ahora todo es una prueba, la configuración puede que no sea estable, cualquier corrección de la misma será bienvenida. La idea es tener el entorno de prueba sin problemas, que sea fácil desarrollar y en el cual se puedan comprobar los resultados, todo esto utilizando docker.
+Hasta el momento, todo se encuentra en fase de prueba; la configuración puede no ser completamente estable, por lo que cualquier corrección será bienvenida. El objetivo es disponer de un entorno de pruebas funcional, que facilite el desarrollo y permita comprobar los resultados, todo ello utilizando Docker.
 
 ## Comandos útiles
 
@@ -218,7 +215,7 @@ Hasta ahora todo es una prueba, la configuración puede que no sea estable, cual
 docker compose down
 ```
 
-- Para ver los logs de un contenedor específico:
+- Para ver los registros de un contenedor específico:
 
 ```bash
 docker compose logs <nombre_del_contenedor>
@@ -236,26 +233,26 @@ Por ejemplo, para abrir una terminal bash en el contenedor `amf`:
 docker exec -it amf /bin/bash
 ```
 
-- Para reconstruir los contenedores después de hacer cambios en el código:
+- Para reconstruir los contenedores después de realizar cambios en el código:
 
 ```bash
 docker compose up -d --build
 ```
 
-Si necesitas instalar utilidades adicionales como `vim`, `strace`, `net-tools`, `curl`, `netcat-openbsd` y `bind-tools` en un contenedor basado en Alpine Linux, puedes ejecutar el siguiente comando dentro del contenedor:
+Si se requiere instalar utilidades adicionales como `vim`, `strace`, `net-tools`, `curl`, `netcat-openbsd` y `bind-tools` en un contenedor basado en Alpine Linux, se puede ejecutar el siguiente comando dentro del contenedor:
 
 ```bash
 apk update && apk add --no-cache -U vim strace net-tools curl netcat-openbsd bind-tools
 ```
 
-Esto actualizará los índices de paquetes e instalará las herramientas necesarias sin guardar archivos temporales, manteniendo la imagen ligera.
+Este comando actualizará los índices de paquetes e instalará las herramientas necesarias sin guardar archivos temporales, manteniendo la imagen ligera.
 
-Script para instalar herramientas en los contenedores core 5G:
+Script para instalar herramientas en los contenedores del core 5G:
 
 ```bash
 #!/bin/bash
 
-# Lista de contenedores core 5G según docker-compose
+# Lista de contenedores del core 5G según docker-compose
 core5g_containers=(amf ausf nrf nssf pcf smf udm udr)
 
 for c in "${core5g_containers[@]}"; do
@@ -277,6 +274,7 @@ Para desplegar los componentes de Aether actualizados, se requiere disponer de l
 1. En el repositorio de cada NF se editó el archivo `VERSION` y se cambió a un valor personalizado, en este caso fue: `v1.2.1-new-dev`.
 
 2. En el archivo `Makefile` se completaron las siguientes variables:
+
 ```makefile
 DOCKER_REGISTRY ?= 192.168.12.15:8083/
 DOCKER_REPOSITORY ?= omecproject/
@@ -285,11 +283,9 @@ DOCKER_REPOSITORY ?= omecproject/
 - `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus en los servidores de la empresa.
 - `DOCKER_REPOSITORY` se configuró con el nombre del repositorio por defecto de Aether SD-Core.
 
-3.  Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al registry. Para hacer el *push* es necesario primero iniciar sesión en el Nexus con `docker login 192.168.12.15:8083`.
-
+3. Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al registry. Para hacer el *push* es necesario primero iniciar sesión en el Nexus con `docker login 192.168.12.15:8083`.
 
 Todos estos pasos pueden adaptarse según la conveniencia de cada usuario, como usar una versión diferente o subir las imágenes a otro registry de Docker.
-
 
 ### Configuración del *values* de Helm
 
@@ -346,18 +342,23 @@ omec-user-plane:
 # otras configuraciones....
 
 ```
+
 - Es importante destacar que el `tag` definido para cada imagen debe contener la siguiente estructura debido a que así es como se estructura la imagen en el registry
-```
+
+```bash
 omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el archivo VERSION del repo del componente>
 ```
+
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
 2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR, NSSF, PCF) y fueron modificadas otras (WebUI, AMF, NRF, SMF). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads).
 
 3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** a través del puerto `5001`. Es por eso que cada NF debe tener esta configuración:
+
 ```yaml
  webuiUri: "http://webui:5001"
 ```
+
 El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, por lo que se hizo necesario aplicar una solución que permitiera exponer el puerto y hacer permanente este cambio. Para ello se utilizó [Kustomize](https://kustomize.io), que permite aplicar modificaciones a manifiestos de Kubernetes. Kustomize tiene definida en un archivo la nueva configuración para el *service* del WebUI y la aplica como un parche al manifiesto final que se renderiza con Helm. Este proceso está incluido en el despliegue del 5GC con Ansible.
 
 ## Kubernetes para desarrollo
@@ -377,32 +378,32 @@ El manifiesto del ***service*** del **WebUI** no tiene este puerto configurado, 
 
 Para desplegar Aether se debe tener un entorno de Kubernetes, en el cual utilizando los diferentes charts de Helm se despliegan los diferentes servicios.
 
-####  1. **Preparar el servidor**
+#### 1. **Preparar el servidor**
 
-Requisitos mínimos del servidor:
+Requisitos mínimos para el servidor:
 
-- 2 CPUs (4 si vas a desplegar Aether)
-- 4–8 GB de RAM (mejor con 8 GB para SD-Core)
-- 20+ GB de almacenamiento
+- 2 CPU (4 si se va a desplegar Aether)
+- 4–8 GB de RAM (se recomienda 8 GB para SD-Core)
+- 20 GB o más de almacenamiento
 - Sistema operativo Ubuntu Server 22.04 LTS
-- Seguridad: grupo de seguridad con puertos abiertos (SSH, 6443, 80, 443, 22, etc.)
+- Seguridad: grupo de seguridad con los puertos necesarios abiertos (SSH, 6443, 80, 443, 22, etc.)
 
 ---
 
 #### 2. **Configurar el entorno base**
 
 ```bash
-# Actualizar paquetes
+# Actualizar los paquetes del sistema
 sudo apt update && sudo apt upgrade -y
 
-# Desactivar swap (requisito de kubeadm)
+# Desactivar el intercambio de memoria (swap), requisito para kubeadm
 sudo swapoff -a
 sudo sed -i '/ swap / s/^/#/' /etc/fstab
 ```
 
 ---
 
-####  3. **Instalar Docker (container runtime)**
+#### 3. **Instalar Docker (container runtime)**
 
 ```bash
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
@@ -426,18 +427,18 @@ sudo usermod -aG docker $USER
 
 ---
 
-####  4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
+#### 4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**
 
 ```bash
 sudo apt-get update -y
-# apt-transport-https may be a dummy package; if so, you can skip that package
+# apt-transport-https puede ser un paquete dummy; si es así, se puede omitir.
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 
-# If the directory `/etc/apt/keyrings` does not exist, it should be created before the curl command, read the note below.
+# Si el directorio `/etc/apt/keyrings` no existe, debe crearse antes de ejecutar el comando curl. Véase la nota siguiente.
 # sudo mkdir -p -m 755 /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-# This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
+# Este comando sobrescribe cualquier configuración existente en /etc/apt/sources.list.d/kubernetes.list
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update -y
@@ -449,73 +450,72 @@ sudo systemctl enable --now kubelet
 
 ---
 
-####  5. **Inicializar el clúster (modo single-node para pruebas)**
+#### 5. **Inicializar el clúster (modo single-node para pruebas)**
 
 ```bash
-# (opcional) Usa tu IP pública o privada como advertise address
+# (Opcional) Utilice la dirección IP pública o privada como advertise address
 sudo kubeadm init \
   --pod-network-cidr=192.168.0.0/16 \
   --apiserver-advertise-address=$(hostname -I | awk '{print $1}') \
   --cri-socket=/var/run/containerd/containerd.sock
-
 ```
 
-Esto instalará un clúster con Calico/Flannel-compatible pod CIDR.
+Este comando instalará un clúster compatible con Calico/Flannel utilizando el pod CIDR especificado.
 
-Si se presentan problemas relacionados con que no se encuentra el `containerd.sock`, se puede hacer lo siguiente:
+Si se presentan problemas relacionados con la ausencia de `containerd.sock`, se recomienda realizar lo siguiente:
 
-Asegurar que containerd esté instalado:
+Verificar que containerd esté instalado:
 
 ```bash
 which containerd
 ```
 
-- Debe devolver algo como:
+El resultado debe ser similar a:
 
 ```bash
 /usr/bin/containerd
 ```
 
-Aseurar que containerd esté corriendo
+Asegurarse de que containerd esté en ejecución:
 
 ```bash
 sudo systemctl status containerd
 ```
 
-Si no está corriendo:
+Si el servicio no está activo, se debe iniciar:
 
 ```bash
 sudo systemctl start containerd
 ```
 
-Verificar que el archivo de configuración de containerd tenga habilitado el CRI
+Comprobar que el archivo de configuración de containerd tenga habilitado el CRI.
 
-Primero ejecutar:
+Primero, ejecutar:
 
 ```bash
 sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 ```
 
-Luego editar el archivo:
+Luego, editar el archivo:
 
 ```bash
 sudo nano /etc/containerd/config.toml
 ```
 
-Buscar esta sección:
+Buscar la siguiente sección:
 
 ```toml
 [plugins."io.containerd.grpc.v1.cri"]
 ```
 
-Verififcar de que no esté comentada y que esté habilitada. También que tenga:
+Verificar que no esté comentada y que se encuentre habilitada. Además, debe contener:
 
 ```toml
   [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
     SystemdCgroup = true
 ```
 
-Reiniciar containerd después de los cambios:
+Reiniciar containerd después de realizar los cambios:
 
 ```bash
 sudo systemctl restart containerd
@@ -526,9 +526,10 @@ Verificar que el socket exista:
 ```bash
 ls -l /var/run/containerd/containerd.sock
 ```
-- Debe aparecer como archivo tipo socket.
 
-Volver a intentar la inicialización:
+Debe aparecer como un archivo de tipo socket.
+
+Intentar nuevamente la inicialización:
 
 ```bash
 sudo kubeadm init \
@@ -549,7 +550,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ---
 
-####  7. **Instalar red de pods (ej. Calico)**
+#### 7. **Instalar red de pods (ej. Calico)**
 
 ```bash
 # Usando Calico como red de pods
@@ -558,7 +559,7 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/
 
 ---
 
-####  8. **Permitir que el nodo actúe como master y worker (modo prueba)**
+#### 8. **Permitir que el nodo actúe como master y worker (modo prueba)**
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
@@ -575,7 +576,7 @@ kubectl get nodes
 kubectl get pods -A
 ```
 
-Debes ver algo como esto:
+Se debe observar una salida similar a la siguiente:
 
 ![alt text](imgs/{70E4BAB7-F16D-481C-AF22-A3AF4EC88405}.png)
 
@@ -585,7 +586,7 @@ Figura 3. Pods de Kubernetes en estado **Running**
 
 #### Instalando Helm
 
-Ejecuta:
+Ejecute los siguientes comandos para instalar Helm:
 
 ```bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -595,35 +596,26 @@ chmod 700 get_helm.sh
 
 #### Obtener y operar charts
 
-Aether proporciona una serie de charts de helm, los cuales se pueden configurar según las necesidadesdel proyecto. Estos charts se pueden encontrar en:
+Aether proporciona una serie de charts de Helm, los cuales pueden configurarse según las necesidades del proyecto. Estos charts se encuentran en:
 
-[https://charts.aetherproject.org](https://charts.aetherproject.org)
+- [https://charts.aetherproject.org](https://charts.aetherproject.org)
+- [https://charts.onosproject.org](https://charts.onosproject.org)
+- [https://charts.opencord.org](https://charts.opencord.org)
+- [https://charts.atomix.io](https://charts.atomix.io)
+- [https://sdrancharts.onosproject.org](https://sdrancharts.onosproject.org)
+- [https://charts.rancher.io/](https://charts.rancher.io/)
 
-[https://charts.onosproject.org](https://charts.onosproject.org)
+Los repositorios de GitHub relevantes son los siguientes:
 
-[https://charts.opencord.org](https://charts.opencord.org)
+- ROC: [https://github.com/onosproject/roc-helm-charts](https://github.com/onosproject/roc-helm-charts)
+- SD-RAN: [https://github.com/onosproject/sdran-helm-charts](https://github.com/onosproject/sdran-helm-charts)
+- SD-Core: [https://github.com/omec-project/sdcore-helm-charts](https://github.com/omec-project/sdcore-helm-charts)
 
-[https://charts.atomix.io](https://charts.atomix.io)
+Para este proyecto, se crearon repositorios propios adaptados a las necesidades específicas:
 
-[https://sdrancharts.onosproject.org](https://sdrancharts.onosproject.org)
+- SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts)
 
-[https://charts.rancher.io/](https://charts.rancher.io/)
-
-Los repos de github son los siguientes:
-
-ROC: [https://github.com/onosproject/roc-helm-charts](https://github.com/onosproject/roc-helm-charts)
-
-SD-RAN: [https://github.com/onosproject/sdran-helm-charts](https://github.com/onosproject/sdran-helm-charts)
-
-SD-Core: [https://github.com/omec-project/sdcore-helm-charts](https://github.com/omec-project/sdcore-helm-charts).
-
-De estos repos hicimos repositorio para trabajar segun las necesidades del proyecto.
-
-SD-Core: [https://github.com/networkgcorefullcode/helm-charts](https://github.com/networkgcorefullcode/sdcore-helm-charts).
-
-Ejecutar los siguientes comandos:
-
-Opcionales:
+Se recomienda ejecutar los siguientes comandos opcionales para añadir repositorios de Helm:
 
 ```bash
 helm repo add stable https://charts.helm.sh/stable
@@ -638,7 +630,7 @@ helm repo update
 
 helm search repo onos
 
-## para revertir esto
+# Para revertir estos cambios:
 helm repo remove stable
 helm repo remove cord
 helm repo remove atomix
@@ -649,12 +641,14 @@ helm repo remove cetic
 helm repo remove bitnami
 ```
 
+Para configurar el almacenamiento local, se deben ejecutar los siguientes comandos:
+
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-Ejecutar los siguientes comandos desde el directorio `helm-charts/`:
+Desde el directorio `helm-charts/`, se recomienda ejecutar:
 
 ```bash
 helm dependency build atomix-1.1.2/chart
@@ -669,7 +663,7 @@ helm dependency build .
 cd ..
 ```
 
-Ejecutar ahora:
+A continuación, se deben instalar los componentes principales:
 
 ```bash
 helm install -n kube-system atomix atomix-1.1.2/chart
@@ -687,47 +681,41 @@ sudo chmod +x build_linux.sh
 ./build_linux.sh
 ```
 
-Ahora ejecutar los siguientes comandos de helm para desplegar el core 5G. Se debe de estar en el repo helm-charts para ejecutar estos comandos.
+Para desplegar el core 5G, se debe ejecutar el siguiente comando desde el repositorio `helm-charts`:
 
 ```bash
-
-# Desplegar el core 5G
 helm install -n sdcore core5g sd-core
-
 ```
 
-Si los servicios relacionados con mongodb no estan funcionando asegurate de que se descargaron los charts como dependencias prueba ejecutar este comando en cada uno de los charts que hay como dependencia.
+Si los servicios relacionados con MongoDB no funcionan correctamente, se debe verificar que los charts se hayan descargado como dependencias. Se recomienda ejecutar el siguiente comando en cada uno de los charts dependientes:
 
 ```bash
-# dirigete a sd-core/charts
 cd sd-core/charts
 
 charts=("5g-control-plane" "5g-ran-sim" "bess-upf" "omec-control-plane" "omec-sub-provision")
 
 for chart in "${charts[@]}"; do
-    helm dependency build "$chart"
-    helm dependency update "$chart"
+  helm dependency build "$chart"
+  helm dependency update "$chart"
 done
 
 cd ..
 cd ..
 ```
 
-El webui es un componente principal para el funcionamiento del core 5g de Aether, en este despliegue se puede retrasar su despliegue con frecuencia y provocar problemas en los demas componentes, para solucionar esto pasado un tiempo se debe eliminar cada uno de los componentes del core para que el deployment los vuelva a reiniciar y ahora con el webui en funcionamiento las cosas funcionen mejor. Los siguientes comandos realizan esa acción.
+El WebUI es un componente principal para el funcionamiento del core 5G de Aether. En este despliegue, su inicialización puede retrasarse y provocar problemas en los demás componentes. Para solucionar esto, se recomienda eliminar los pods de los componentes del core, excepto el WebUI, para que el deployment los reinicie y, con el WebUI en funcionamiento, el sistema opere correctamente. Los siguientes comandos permiten realizar esta acción:
 
 ```bash
-# Puedes usar un comando kubectl para listar todos los pods excepto el webui:
-
+# Listar todos los pods excepto el webui, mongodb, kafka y core5g-zookeeper:
 kubectl get pods -n sdcore | grep -v webui | grep -v mongodb | grep -v kafka | grep -v core5g-zookeeper
 
-# Usa el siguiente comando para eliminar todos los pods excepto el webui:
-
+# Eliminar todos los pods excepto los mencionados:
 kubectl get pods -n sdcore | grep -v webui | grep -v mongodb | grep -v kafka | grep -v core5g-zookeeper | awk '{print $1}' | xargs kubectl delete pod -n sdcore
 ```
 
 #### Utils
 
-Para habilitar una instancia de mongodb express que nos provea de una interfaz web para visualizar facilmente la base de datos mongodb. Crear y guardar esto en un nuestro entorno
+Para habilitar una instancia de MongoDB Express que provea una interfaz web para visualizar fácilmente la base de datos MongoDB, se debe crear y guardar el siguiente manifiesto en el entorno correspondiente.
 
 ```yml
 apiVersion: v1
@@ -784,13 +772,13 @@ spec:
       nodePort: 30081
 ```
 
-Ejecutar el comando apply correspondiente
+Ejecute el comando `apply` correspondiente:
 
 ```bash
 kubectl apply -f <file_name> -n <name_space>
 ```
 
-Revisar los logs y verificar que todo funcione correctamente, si hay errores en el despliegue, se debe revisar la configuracion proporcionada en el helm chart correspondiente.
+Revise los logs y verifique que todo funcione correctamente. Si se presentan errores en el despliegue, se debe revisar la configuración proporcionada en el Helm chart correspondiente.
 
 Puertos de los servicios
 
@@ -1248,63 +1236,107 @@ $ kubectl get po -n bess-upf
 
 ### NRF (NfProfile Update)
 
-El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
+El NRF de las versiones estables de Aether presenta problemas al integrar nuevos perfiles de red, debido a la ausencia de campos que están presentes en releases más modernos del 3GPP. A continuación, se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
 
-Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se deberia hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF de Aether que deberían utilizar esta nueva versión de openapi actualizada.
+Después de analizar todas las alternativas para la actualización del NRF, se determinó que, con solo actualizar el modelo NfProfile, sería posible integrar los nuevos perfiles de red de manera más eficiente. Para ello, se debe generar un nuevo release de OpenAPI con el modelo actualizado y especificar en cada NF de Aether que utilice esta nueva versión de OpenAPI.
 
-Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y en releases más modernos se debe indicar el campo NfServiceList, este campo lo puede completar el NRF en el proceso de registro.
+Las NF de Aether proporcionan, en el registro de su perfil, el campo NfServices; en releases más recientes, se requiere indicar el campo NfServiceList, el cual puede ser completado por el NRF durante el proceso de registro.
 
 #### Proceso de desarrollo
 
 1. Se actualizó el modelo NfProfile en el repositorio de Aether.
 
-Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de  openApiFiles/files están todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el *Release* 16 tiene todos los .yml organizados hasta el *Release* 16. Se puede ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+Para ello, se generó el OpenAPI correspondiente utilizando el `openapi-generator-cli`, el cual se encuentra en el repositorio de OpenAPI. En el repositorio `openApiFiles/files` están todos los archivos `.yaml` necesarios para generar el OpenAPI de cada componente. Actualmente, el *Release* 16 contiene todos los archivos `.yml` organizados hasta dicha versión. Puede consultarse en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
 
-En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
+En una máquina Ubuntu 22.04 o superior se debe contar con lo siguiente:
 
-- Java 11 o superior
-- Descargar el openapi-generator-cli.jar desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>
-- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar que se ha instalado correctamente.
-- Generar el openapi de go con los siguientes comandos:
+- Java 11 o superior.
+- Descargar el archivo `openapi-generator-cli.jar` desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>.
+- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar la instalación.
+- Generar el cliente OpenAPI de Go con los siguientes comandos:
 
 ```bash
-java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio>   -g go   -o ./go-nrf-client
+java -jar openapi-generator-cli.jar generate -i <ruta_al_yaml_del_servicio> -g go -o ./go-nrf-client
 ```
 
-En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
+En `openApiFiles/openApiGeneratorOutputs/go-nrf-client` se encuentran todos los archivos generados del cliente de Go correspondiente al NRF para el servicio Nnrf_NFManagement.
 
-Para actualizar el NfProfile se utilizó el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs se actualizó el modelo manualmente, comprobando que solo se agregaran nuevas *struct* sin romper las anteriores definidas por Aether.
+Para actualizar el NfProfile se utilizó el modelo generado por OpenAPI Generator. Inicialmente, se cometió el error de copiar y pegar los nuevos modelos generados como una opción de desarrollo más rápida, lo que introdujo una serie de errores que provocaron cambios en la estructura original de Aether. El OpenAPI Generator crea structs y métodos utilizando una plantilla común; en ocasiones, el código generado no era compatible con las necesidades de Aether, por lo que se realizaron modificaciones manuales según los requerimientos. Para evitar estos errores, se actualizó el modelo manualmente, asegurando que solo se agregaran nuevas *structs* sin afectar las previamente definidas por Aether.
 
-Puedes visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
+Se pueden consultar los siguientes commits donde se realizaron todos los cambios necesarios en el modelo de OpenAPI:
 ![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
 
-2. Se creó un nuevo release de openapi con el modelo actualizado.
+2. Se creó un nuevo release de OpenAPI con el modelo actualizado.
 
-Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se hizo un push con ese tag.
+Este paso fue sencillo; simplemente se creó un nuevo tag en la rama `main` y se realizó un push con dicho tag.
 
-3. Se especifica en cada NF de Aether que deben utilizar la nueva versión de openapi
+3. Se especificó en cada NF de Aether que deben utilizar la nueva versión de OpenAPI.
 
-En cada NF de aether se agregaron las siguientes líneas en el archivo de los modulos de go:
+En cada NF de Aether se agregaron las siguientes líneas en el archivo de los módulos de Go:
 
 ![alt text](imgs/image.png)
 
-Luego se hicieron builds de estas NF para testearlas en el entornos de desarollo
+Posteriormente, se realizaron builds de estas NF para probarlas en los entornos de desarrollo.
 
-Por último se actualizó el NRF para que llenara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios los puede ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
+Finalmente, se actualizó el NRF para que completara el campo `NfServiceList` en caso de que no fuera recibido por parte de la NF. Los cambios pueden consultarse aquí: [Enlace al commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
 
 ### WebUI Update
 
-El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta WebUI utilizando el la dirección y puerto que le asigne para este servicio.
+El WebUI tiene la capacidad de mostrar y gestionar información a través de una página web. Haciendo uso de inteligencia artificial, se creó una página web para agregar esta funcionalidad; además, se realizaron modificaciones en la construcción de la imagen de Docker para habilitar dicha característica. Se puede acceder a este WebUI utilizando la dirección y el puerto asignados para este servicio.
 
 ### AMF, SMF, NSSF update to release 2.0.0
 
-Estos componentes aún no tenían integrado nuevas funcionalidades como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, se han actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo *release*.
+Estos componentes aún no tenían integradas nuevas funcionalidades, como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether implementó recientemente nuevas características para estos componentes; se han actualizado manualmente para agregar dichas funcionalidades. Estos cambios aún están en desarrollo y en sus respectivas ramas, donde serán probados y posteriormente lanzados en un nuevo *release*.
+
+### Implementación de una conexión manual
+
+Para interoperar entre componentes de diferentes cores Aether todavía presenta varias limitantes. Como una primera solución a corto plazo proponemos habilitar la configuración manual de las conexiones entre los diferentes componentes. En nuestros repositorios estamos trabajando en esta dirección. Para esta funcionalidad se estudió cada uno de las NFs de Aether buscando las instancias que realizan la función de descovery NFs instances. Estas imagenes a continuación muestran los cambios realizados en el AMF, los mismos fueron implementados en PCF, NSSF, AUSF, UDM, UDR, que son las otras NF que implementan el descubrimiento de instancias.
+
+Primero en el paquete factory (el responsable de manejar las configuraciones de las NF de aether) se agregaron en la struct Configuration una nueva struct llamada `ManualConfigs`. Ver la siguiente imagen.
+
+![alt text](imgs/image1231.png)
+
+`ManualConfigs` es una struct relativamente sencilla tiene dos campos uno que es un mapa que relaciona instancia de un determinado tipo con una lista de los profiles de dichas instancias, aqui estamos definiendo manualmente el NfProfile de las , el otro campo permite habilitar esta funcionalidad o deshabilitarla. Ver la siguiente imagen
+
+![alt text](imgs/image12312312.png)
+
+Después la siguiente implementación se realizó en la función encargada de obtener las NfInstances. Ver la siguiente imagen.
+
+![alt text](imgs/image1.png)
+> En el primer bloque condicional habilitamos la búsqueda de configuraciones manuales, si no se obtiene ningun resultado o hay algún error entonces se utilizan los otros métodos existentes
+
+La última función implementada permite obtener las instancias de NF de manera manual, utilizando las configuraciones definidas en `ManualConfigs`. Ver la siguiente imagen.
+
+![alt text](imgs/image2.png)
+> Primero verifica si la configuración manual (manualConfig) es nula; si lo es, retorna un resultado vacío. Si no, crea un resultado (SearchResult) y agrega las instancias NF del tipo objetivo (targetNfType) desde la configuración manual.
+> Luego, si se pasan parámetros de búsqueda (param), filtra las instancias NF por el SUPI (identificador de suscriptor) usando la función filterNfInstancesBySupi. Esta función recorre las instancias NF y, dependiendo del tipo de NF, verifica si el SUPI está dentro de los rangos definidos en la información específica de cada NF. Si encuentra una coincidencia, agrega la instancia filtrada al resultado.
+> Puntos clave: El filtrado por SUPI solo ocurre si se proporciona el parámetro. El filtrado depende del tipo de NF y de los rangos de SUPI definidos en la configuración. Si no hay coincidencias, el resultado puede estar vacío.
+
+Como se mencionó anteriormente, este proceso se repitió tal cual en PCF, NSSF, AUSF, UDM y UDR. Por último se hicieron builds de cada uno de estas NFs, también se modificó OnRamp para este caso de uso. Se hizo una simulación donde le habilitamos esta funcionalidad al AMF y se verificó su correcto funcionamiento, donde el AMF buscaba en la configuración manual y obtenía los parámetros necesarios para comunicarse con las instancias correspondientes, el yaml proporcionado luce así.
+
+![alt text](imgs/image3.png)
+
+Para la integración de la configuración manual deberemos asegurarnos de:
+
+- Proporcionar los endpoints correctos en nuestro caso de uso utilizamos el fqdn de los servicios internos.
+- Asegurarnos de que las instancias a las cuales hacemos referencia estén disponibles, como una posible solución podremos hacer un health check de las mismas, que verifique si la conectividad es correcta y ajuste los estados dinamicamente.
+
+Posibilidades:
+
+- Conexión directa entre componentes evitando los procedimientos relacionados con el NRF.
+- Reducción de la latencia en la comunicación entre componentes.
+- Mejora en la interoperabilidad entre diferentes versiones de Aether.
+- La opción de comunicación con otros core los cuales tienen los datos de autenticación de nuestros usuarios.
+
+Contras:
+
+- Agrega una complejidad adicional en la gestión de los sistemas, siendo dificil de mantener a gran escala.
 
 ## Pruebas de simulación y trazas de logs de registro
 
 Utilizando el entorno de desarrollo, se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla como se llevo a cabo este proceso.
 
-#### Configuraciones previas
+### Configuraciones previas
 
 Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM.
 
@@ -1361,39 +1393,38 @@ node2
 #node4
 ```
 
-
 #### Despliegue de Aether  y UERANSIM
 
-
 Para desplegar aether primeramente es necesario instalar Kubernetes con:
+
 ```bash
 make aether-k8s-install
 ```
 
-
 Luego se despliega Aether con:
+
 ```bash
 make aether-5gc-install
 ```
 
-
 Para desplegar UERANSIM se corre el comando:
+
 ```bash
 make aether-ueransim-install
 ```
-
-
 
 #### Simulación
 
 Para correr la simulación con UERANSIM se debe entrar por ssh a la VM del simulador, y en la carpeta `ueransim/build` correr los siguientes comandos.
 
 Para simular la `gnb`:
+
 ```bash
 ./nr-gnb -c ../config/custom-gnb.yaml
 ```
 
 Resultado esperado del comando anterior:
+
 ```
 UERANSIM v3.2.7
 [2025-08-13 15:55:46.882] [sctp] [info] Trying to establish SCTP connection... (192.168.12.11:38412)
@@ -1415,13 +1446,14 @@ UERANSIM v3.2.7
 [2025-08-13 15:56:13.355] [ngap] [info] PDU session resource(s) setup for UE[2] count[1]
 ```
 
-
 Para simular el UE:
+
 ```bash
 ./nr-ue -c ../config/custom-ue.yaml
 ```
 
 Resultado esperado del comando anterior:
+
 ```
 UERANSIM v3.2.7
 [2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
@@ -1454,7 +1486,6 @@ UERANSIM v3.2.7
 [2025-08-13 15:56:13.361] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 192.168.100.2] is up.
 ```
 
-
 Luego de que esten correctamente inicializados el `gnb` y el `ue` se puede hacer ping a google con:
 
 ```bash
@@ -1467,18 +1498,18 @@ Luego de que esten correctamente inicializados el `gnb` y el `ue` se puede hacer
 ip a
 ```
 
-
-
-#### Cambio en la configuracion del *service* `nrf`.
+#### Cambio en la configuracion del *service* `nrf`
 
 Para que el UDM pueda acceder el puerto del *service* del NRF, es necesario cambiar su tipo a `NodePort`. Esto se puede hacer con las siguientes instrucciones:
 
 ```bash
 kubebctl edit svc nrf -n aether-5gc
 ```
+
 - Comando para editar el service del `nrf` en el *namespace* `aether-5gc`
 
 Salida esperada:
+
 ```yaml
 # Please edit the object below. Lines beginning with a '#' will be ignored,
 # and an empty file will abort the edit. If an error occurs while saving this file will be
@@ -1523,26 +1554,24 @@ status:
   loadBalancer: {}
 ```
 
-
 Se debe cambiar el campo `spec.type` a `NodePort`.
-
 
 > [!NOTE] Nota Importante
 > Este cambio se realiza "en caliente" luego de que esta desplegado todo el cluster. Si por algún motivo se reinstala Aether este cambio se sobreescribirá por su configuración original y será necesario realizarlo nuevamente.
 
-
 Después de realizar el cambio de configuración en el *service* del NRF, al ejecutar el comando `kubectl get svc -n aether-5gc`, se podrá observar que el servicio del NRF tiene un puerto mapeado.
-
 
 #### Instalación de Docker y Docker Compose
 
 Docker:
+
 ```bash
 sudo apt update
 sudo apt install -y docker.io
 ```
 
 Para usarlo como usuario normal:
+
 ```bash
 sudo groupadd docker
 sudo usermod -aG docker $USER
@@ -1564,8 +1593,6 @@ git clone https://github.com/networkgcorefullcode/udm-open5gs-deploy.git
 ```
 
 Nota: Este repositorio también incluye configuraciones para el AUSF, el UDR y el Webui de Open5GS para probar la integración de estas NFs con Aether. Por el momento este informe solo estará enfocado en el registro del UDM.
-
-
 
 Antes de desplegar el UDM de Open5GS se debe editar su archivo de configuración para indicar la dirección de la URI del NRF de Aether. Dentro de la carpeta del repositorio clonado ejecutar el siguiente comando
 
@@ -1609,22 +1636,22 @@ udm:
 #          - uri: http://SCP_IP:7777
 ```
 
-
 Luego se puede desplegar el UDM de Open5GS en Docker, utilizando el siguiente comando:
+
 ```bash
 docker-compose -f udm-deploy.yaml up -d
 ```
 
-
 #### Evidencia de registro en los logs
 
 Luego de completar el despliegue del UDM se pueden ver los logs del contenedor con el comando:
+
 ```bash
 docker logs udm
 ```
 
-
 Salida esperada:
+
 ```logs-UDM
 Deploying component: 'udm'
 Open5GS daemon v2.7.5-24-g8e286b6
@@ -1645,82 +1672,84 @@ Open5GS daemon v2.7.5-24-g8e286b6
 ```
 
 En la siguiente línea se puede ver el resultado del registro del UDM en el NRF de Aether.
+
 ```
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
 
-
 Los logs del NRF se pueden obtener con el comando:
+
 ```bash
 kubectl logs -n aether-5gc <NRF_pod_name>
 ```
 
 Salida esperada:
+
 ```logs-NRF
-2025-08-13T19:57:51.601Z	DEBUG	management/api_nf_instance_id_document.go:102	Deserialize json data in the struct NfProfile	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.601Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.601Z	DEBUG	producer/nf_management.go:461	[NRF] In NFRegisterProcedure	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.601Z	WARN	context/management_data.go:73	PLMN config not provided by NF, using supported PLMNs from webconsole	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:78	Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}]	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.602Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:435	NfServices is nil, setting NfServices from NfServiceList	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:443	finish the function nnrfNFManagementOption	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.606Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.607Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:542	Location header:  http://nrf:29510/nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.608Z	DEBUG	producer/nf_management.go:70	register success	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.608Z	INFO	logger/logger.go:91	| 201 |   192.168.12.11 | PUT     | /nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d | 	{"component": "NRF", "category": "GIN"}
-2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:182	Handle CreateSubscriptionRequest	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:123	Handle GetNFInstancesRequest	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.609Z	ERROR	producer/nf_management.go:127	Error in string conversion:  0	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.609Z	INFO	logger/logger.go:91	| 400 |   192.168.12.11 | GET     | /nnrf-nfm/v1/nf-instances | 	{"component": "NRF", "category": "GIN"}
+2025-08-13T19:57:51.601Z DEBUG management/api_nf_instance_id_document.go:102 Deserialize json data in the struct NfProfile {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z INFO producer/nf_management.go:64 Handle NFRegisterRequest {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z DEBUG producer/nf_management.go:461 [NRF] In NFRegisterProcedure {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.601Z WARN context/management_data.go:73 PLMN config not provided by NF, using supported PLMNs from webconsole {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z DEBUG context/management_data.go:78 Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}] {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z INFO context/management_data.go:103 HeartBeat Timer value: 60 sec {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z DEBUG context/management_data.go:435 NfServices is nil, setting NfServices from NfServiceList {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z DEBUG context/management_data.go:443 finish the function nnrfNFManagementOption {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.606Z INFO context/management_data.go:484 urilist update {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.607Z INFO producer/nf_management.go:527 Create NF Profile  UDM {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z INFO producer/nf_management.go:542 Location header:  http://nrf:29510/nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z DEBUG producer/nf_management.go:70 register success {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z INFO logger/logger.go:91 | 201 |   192.168.12.11 | PUT     | /nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d |  {"component": "NRF", "category": "GIN"}
+2025-08-13T19:57:51.608Z INFO producer/nf_management.go:182 Handle CreateSubscriptionRequest {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.608Z INFO producer/nf_management.go:123 Handle GetNFInstancesRequest {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.609Z ERROR producer/nf_management.go:127 Error in string conversion:  0 {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.609Z INFO logger/logger.go:91 | 400 |   192.168.12.11 | GET     | /nnrf-nfm/v1/nf-instances |  {"component": "NRF", "category": "GIN"}
 ```
 
-
 En esta línea se puede ver la llegada de la solititud de registro del UDM de Open5GS:
+
 ```logs-NRF
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
 ```
 
-
 Se activa el procedimiento de registro:
-```logs-NRF
-2025-08-13T19:57:51.601Z	DEBUG	producer/nf_management.go:461	[NRF] In NFRegisterProcedure	{"component": "NRF", "category": "MGMT"}
-```
 
+```logs-NRF
+2025-08-13T19:57:51.601Z DEBUG producer/nf_management.go:461 [NRF] In NFRegisterProcedure {"component": "NRF", "category": "MGMT"}
+```
 
 Se obtienen las configuraciones de PLMN del `webconsole` ya que no fueron proporcionadas por la nueva NF (UDM)
-```logs-NRF
-2025-08-13T19:57:51.601Z	WARN	context/management_data.go:73	PLMN config not provided by NF, using supported PLMNs from webconsole	{"component": "NRF", "category": "MGMT"}
-2025-08-13T19:57:51.602Z	DEBUG	context/management_data.go:78	Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}]	{"component": "NRF", "category": "MGMT"}
-```
 
+```logs-NRF
+2025-08-13T19:57:51.601Z WARN context/management_data.go:73 PLMN config not provided by NF, using supported PLMNs from webconsole {"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.602Z DEBUG context/management_data.go:78 Fetched PLMN list from webconsole: [{Mcc:208 Mnc:93}] {"component": "NRF", "category": "MGMT"}
+```
 
 Se crea un `NFProfile` para la nueva NF
-```logs-NRF
-2025-08-13T19:57:51.607Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
-```
 
+```logs-NRF
+2025-08-13T19:57:51.607Z INFO producer/nf_management.go:527 Create NF Profile  UDM {"component": "NRF", "category": "MGMT"}
+```
 
 Registro exitoso:
-```logs-NRF
-2025-08-13T19:57:51.608Z	DEBUG	producer/nf_management.go:70	register success	{"component": "NRF", "category": "MGMT"}
-```
 
+```logs-NRF
+2025-08-13T19:57:51.608Z DEBUG producer/nf_management.go:70 register success {"component": "NRF", "category": "MGMT"}
+```
 
 Luego del registro, el NRF recibe una petición por parte del UDM para conocer otras NFs del Core:
-```logs-NRF
-2025-08-13T19:57:51.608Z	INFO	producer/nf_management.go:123	Handle GetNFInstancesRequest	{"component": "NRF", "category": "MGMT"}
-```
 
+```logs-NRF
+2025-08-13T19:57:51.608Z INFO producer/nf_management.go:123 Handle GetNFInstancesRequest {"component": "NRF", "category": "MGMT"}
+```
 
 El NRF de Aether encuentra un error (`Error in string conversion: 0`) al procesar la petición de descubrimiento del UDM. Como resultado, responde al UDM con un error **400 Bad Request**.
+
 ```logs-NRF
-2025-08-13T19:57:51.609Z	ERROR	producer/nf_management.go:127	Error in string conversion:  0	{"component": "NRF", "category": "MGMT"}
+2025-08-13T19:57:51.609Z ERROR producer/nf_management.go:127 Error in string conversion:  0 {"component": "NRF", "category": "MGMT"}
 ```
 
-
 El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en su lugar recibió un "Bad Request". Como no puede descubrir otros servicios, su inicialización falla.
+
 ```logs-UDM
 08/13 19:57:51.609: [sbi] ERROR: HTTP ERROR Status : 400 (../lib/sbi/message.c:1528)
 08/13 19:57:51.609: [sbi] WARNING: No links (../lib/sbi/nf-sm.c:391)
@@ -1728,12 +1757,10 @@ El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en s
 08/13 19:57:51.611: [sbi] ERROR: No http.location (../lib/sbi/nnrf-handler.c:912)
 ```
 
-
 El proceso anterior se describe también en la siguiente figura:
 ![Registro del UDM (Open5GS) en el NRF (Aether)](imgs/registo-del-UDM(Open5GS)-en-NRF(Aether).png)
 
 Figura 6. Registro del UDM (Open5GS) en el NRF (Aether)
-
 
 ## Evaluación final y recomendaciones
 
