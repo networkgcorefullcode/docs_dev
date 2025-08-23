@@ -40,7 +40,6 @@
       - [Obtener y operar charts](#obtener-y-operar-charts)
       - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
-    - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes-1)
   - [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
     - [Configuraciones previas](#configuraciones-previas)
       - [Despliegue de Aether  y UERANSIM](#despliegue-de-aether--y-ueransim)
@@ -72,7 +71,6 @@ El **alcance** de este informe comprende:
 - La recolección de evidencia de los cambios realizados, mediante el análisis de logs obtenidos en pruebas de simulación.
 
 Con ello, el documento proporciona una visión clara y ordenada del proceso seguido para resolver el problema identificado en el NRF, garantizando la trazabilidad de los cambios y su validación en diferentes escenarios.
->>>>>>> 430fcd3 (update technical report)
 
 ---
 
@@ -216,7 +214,7 @@ for dir in "$current_dir"/* ; do
 done
 ```
 
-Este script copiará todos los builds de Go en una carpeta llamada `bin`.
+Este script copiará todos los builds de Go en una carpeta llamada `bin`, como se muestra en la Figura 2.
 
 ```bash
 ./get_builds.sh
@@ -688,7 +686,7 @@ Se debe observar una salida similar a la siguiente:
 
 ![alt text](imgs/{70E4BAB7-F16D-481C-AF22-A3AF4EC88405}.png)
 
-Figura 3. Pods de Kubernetes en estado **Running**
+Figura ##. Pods de Kubernetes en estado **Running**
 
 ### Trabajando con Helm
 
@@ -1046,40 +1044,6 @@ $ helm install -n bess-upf bess-upf [path/to/helm/chart] -f overriding-values.ya
 $ kubectl get po -n bess-upf
 # NAME    READY   STATUS    RESTARTS   AGE
 # upf-0   4/4     Running   0          41h
-```
-
-
-### Comandos para eliminar kubernetes
-
-```bash
-sudo systemctl stop kubelet
-sudo systemctl stop docker
-
-sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
-sudo apt-get autoremove
-
-# Reiniciar la pc en este paso
-sudo rm -rf ~/.kube
-sudo rm -rf /etc/kubernetes/
-sudo rm -rf /var/lib/etcd/
-sudo rm -rf /var/lib/kubelet/
-sudo rm -rf /var/lib/dockershim/
-sudo rm -rf /var/run/kubernetes/
-sudo rm -rf /etc/cni/
-sudo rm -rf /opt/cni/
-sudo rm -rf /opt/local-path-provisioner
-
-sudo docker system prune -a --volumes
-
-kubectl version
-# Debe decir comando no encontrado
-
-kubeadm version
-# Debe decir comando no encontrado
-
-sudo rm -rf $HOME/.cache/helm
-sudo rm -rf $HOME/.config/helm
-sudo rm -rf $HOME/.local/share/helm
 ```
 
 
