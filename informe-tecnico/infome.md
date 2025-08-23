@@ -2,56 +2,105 @@
 
 ## Índice
 
-- [Introducción](#introducción)
-- [Para desarrollo](#pasos-iniciales)
-  - [Instalaciones necesarias](#instalaciones-necesarias)
-  - [Clonar repositorios](#clonar-repositorios)
-  - [Construir componentes](#construir-componentes)
-  - [Obtener builds](#obtener-builds)
-  - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
-  - [Entorno de docker](#entorno-de-docker)
+- [Informe Técnico](#informe-técnico)
+  - [Índice](#índice)
+  - [Introducción](#introducción)
+  - [Configuración del entorno de desarrollo](#configuración-del-entorno-de-desarrollo)
+    - [Pasos iniciales](#pasos-iniciales)
+    - [Instalaciones necesarias](#instalaciones-necesarias)
+    - [Clonar repositorios](#clonar-repositorios)
+    - [Construir componentes](#construir-componentes)
+    - [Obtener builds](#obtener-builds)
+    - [Ejecutar componentes individualmente](#ejecutar-componentes-individualmente)
+  - [Ejemplos de desarrollo](#ejemplos-de-desarrollo)
+    - [NRF (NfProfile Update)](#nrf-nfprofile-update)
+      - [Proceso de desarrollo](#proceso-de-desarrollo)
+    - [WebUI Update](#webui-update)
+    - [AMF, SMF, NSSF update to release 2.0.0](#amf-smf-nssf-update-to-release-200)
+  - [Entorno de Docker](#entorno-de-docker)
   - [Comandos útiles](#comandos-útiles)
-
-- [Kubernetes Environment](#kubernetes-environment)
+  - [Kubernetes Environment](#kubernetes-environment)
   - [Aether OnRamp](#aether-onramp)
+    - [Imágenes de Docker](#imágenes-de-docker)
+    - [Configuración del *values* de Helm](#configuración-del-values-de-helm)
   - [Kubernetes para desarrollo](#kubernetes-para-desarrollo)
     - [Requisitos](#requisitos)
-    - [Instalación-del-entorno-de-kubernetes](#instalación-del-entorno-de-kubernetes)
+    - [Instalación del entorno de Kubernetes](#instalación-del-entorno-de-kubernetes)
+      - [1. **Preparar el servidor**](#1-preparar-el-servidor)
+      - [2. **Configurar el entorno base**](#2-configurar-el-entorno-base)
+      - [3. **Instalar Docker (container runtime)**](#3-instalar-docker-container-runtime)
+      - [4. **Instalar Kubernetes (kubeadm, kubelet, kubectl)**](#4-instalar-kubernetes-kubeadm-kubelet-kubectl)
+      - [5. **Inicializar el clúster (modo single-node para pruebas)**](#5-inicializar-el-clúster-modo-single-node-para-pruebas)
+      - [6. **Configurar el entorno para el usuario actual**](#6-configurar-el-entorno-para-el-usuario-actual)
+      - [7. **Instalar red de pods (ej. Calico)**](#7-instalar-red-de-pods-ej-calico)
+      - [8. **Permitir que el nodo actúe como master y worker (modo prueba)**](#8-permitir-que-el-nodo-actúe-como-master-y-worker-modo-prueba)
+      - [9. **Verifica que todo está funcionando**](#9-verifica-que-todo-está-funcionando)
     - [Trabajando con Helm](#trabajando-con-helm)
-      - [Instalación de Helm](#instalando-helm)
-      - [Obtener y operar Helm Charts](#obtener-y-operar-charts)
+      - [Instalando Helm](#instalando-helm)
+      - [Obtener y operar charts](#obtener-y-operar-charts)
       - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
-- [Ejemplos de desarrollo](#ejemplos-de-desarrollo)
-- [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
+    - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes-1)
+  - [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
+    - [Configuraciones previas](#configuraciones-previas)
+      - [Despliegue de Aether  y UERANSIM](#despliegue-de-aether--y-ueransim)
+      - [Simulación](#simulación)
+      - [Cambio en la configuracion del *service* `nrf`](#cambio-en-la-configuracion-del-service-nrf)
+      - [Instalación de Docker y Docker Compose](#instalación-de-docker-y-docker-compose)
+      - [Despliegue del UDM de Open5GS](#despliegue-del-udm-de-open5gs)
+      - [Evidencia de registro en los logs](#evidencia-de-registro-en-los-logs)
+  - [Evaluación final y recomendaciones](#evaluación-final-y-recomendaciones)
 
 ## Introducción
 
-Este informe técnico recopila todo lo realizado para disponer de un entorno de desarrollo que permita integrar nuevos cambios a los elementos presentados por Aether.
+Durante el ciclo de tareas llevadas a cabo con Aether SD-Core en el Proyecto 5G, se identificó que el NRF (Network Repository Function) presentaba **limitaciones** que dificultaban su correcta integración con funciones de red externas al núcleo 5G de Aether. Estas limitaciones se relacionaban con falta de campos necesarios en las solicitudes de registro de los elementos externos. Como resultado, surgió la necesidad de actualizar el código del NRF, reconstruirlo y someterlo a un proceso sistemático de pruebas que asegurara su correcto desempeño.
 
-Para cumplir con los requisitos del proyecto, se realizaron forks de algunos repositorios de Aether, los cuales se pueden consultar en los siguientes enlaces:
+El **objetivo** de este informe es documentar el proceso de actualización del NRF en Aether SD-Core, detallando las acciones realizadas para configurar el entorno de desarrollo, modificar y compilar el código, y validar su funcionamiento en entornos controlados y progresivamente más complejos.
 
-- Repositorio de GitHub para el proyecto OMEC ([https://github.com/omec-project](https://github.com/omec-project)): Microservicios para SD-Core, además del emulador (gNBsim) que somete a SD-Core a cargas de trabajo RAN.
-- Repositorio de GitHub para el proyecto ONOS ([https://github.com/onosproject](https://github.com/onosproject)): Microservicios para SD-RAN y ROC, además de los modelos YANG utilizados para generar la API de Aether.
-- Repositorio de GitHub para la ONF ([https://github.com/opennetworkinglab](https://github.com/opennetworkinglab)): Documentación de OnRamp y playbooks para el despliegue de Aether.
+El **alcance** de este informe comprende:
 
-Los forks se encuentran disponibles en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
+- La configuración del entorno de desarrollo utilizado para trabajar con el código del NRF.
 
-En este caso, se editó la Integración Continua (CI) para adaptarla a las necesidades del proyecto.
+- Los cambios aplicados en el código fuente y su impacto en el comportamiento de la función.
 
-Al realizar forks, será posible contribuir en el futuro al proyecto original.
+- El proceso de build de cada función de red involucrada.
 
-Las imágenes de Docker se almacenan en Docker Hub y pueden encontrarse buscando 'network5gcore' en la plataforma.
+- Las pruebas realizadas inicialmente en un entorno con Docker.
+
+- La adaptación de la configuración para su despliegue en Kubernetes con Aether OnRamp.
+
+- La recolección de evidencia de los cambios realizados, mediante el análisis de logs obtenidos en pruebas de simulación.
+
+Con ello, el documento proporciona una visión clara y ordenada del proceso seguido para resolver el problema identificado en el NRF, garantizando la trazabilidad de los cambios y su validación en diferentes escenarios.
+>>>>>>> 430fcd3 (update technical report)
 
 ---
 
-## Pasos iniciales
+## Configuración del entorno de desarrollo
 
-Objetivo: Construir las imágenes de cada uno de los componentes de Aether, utilizando configuraciones propias para crear un entorno válido para el desarrollo. El entorno debe ser implementado únicamente con Docker.
+Se hicieron forks de algunos de los repositorios de Aether, los cuales se pueden encontrar en [este enlace](https://github.com/orgs/networkgcorefullcode/repositories).
+
+GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://github.com/opennetworkinglab) — Documentación de OnRamp y playbooks para desplegar Aether.
+
+Las imágenes de Docker se guardan en Docker Hub, se pueden encontrar buscando 'network5gcore' en la plataforma.
+
+
+
+### Pasos iniciales
+
+La configuración de un entorno de desarrollo se realiza con el objetivo de desarrollar los cambios en el código del NRF y construir las imágenes de cada uno de los componentes de Aether, utilizando configuraciones propias para crear un entorno válido para el desarrollo.
+
+El entorno de desarrollo está compuesto por una VM (Máquina Virtual) en Proxmox con las siguientes características:
+
+- SO (Sistema Operativo) Ubuntu Server 24.04 LTS
+- 12 GB de RAM
+- 6 CPUs
+- 100 GB de almacenamiento
+
 
 ### Instalaciones necesarias
 
-Las instalaciones necesarias son las siguientes:
+Las instalaciones necesarias en el servidor son las siguientes:
 
 - [Go](https://go.dev/doc/install)
 - [Docker](https://docs.docker.com/engine/install/ubuntu/)
@@ -103,7 +152,8 @@ for repo in repos:
 python3 python_get_repos.py
 ```
 
-Después de que finalice la ejecución del script, se obtendrán las siguientes carpetas:
+
+Después de que termine la ejecución del script, se obtendrá la estructura de carpetas que se muestra en la Figura 1.
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
@@ -176,7 +226,8 @@ Este script copiará todos los builds de Go en una carpeta llamada `bin`.
 
 Figura 2. Carpeta `bin` con las carpetas correspondientes a cada binario compilado con Go.
 
-## Ejecutar componentes individualmente
+
+### Ejecutar componentes individualmente
 
 Para ejecutar los componentes individualmente y realizar pruebas en cada uno de ellos, se debe proceder de la siguiente manera:
 
@@ -196,6 +247,63 @@ cd ~/aether-forks/bin
 Este procedimiento se aplica a cada uno de los componentes que soporten una configuración inicial a través de un archivo de configuración YAML.
 
 De esta forma, es posible probar cada componente de manera individual y verificar su funcionamiento antes de integrarlos en un entorno más complejo, como Docker o Kubernetes. Esta práctica resulta especialmente útil para el desarrollo y la depuración de cada componente por separado.
+
+## Ejemplos de desarrollo
+
+### NRF (NfProfile Update)
+
+El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
+
+Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se deberia hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF de Aether que deberían utilizar esta nueva versión de openapi actualizada.
+
+Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y en releases más modernos se debe indicar el campo NfServiceList, este campo lo puede completar el NRF en el proceso de registro.
+
+#### Proceso de desarrollo
+
+1. Se actualizó el modelo NfProfile en el repositorio de Aether.
+
+Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de  openApiFiles/files están todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el *Release* 16 tiene todos los .yml organizados hasta el *Release* 16. Se puede ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+
+En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
+
+- Java 11 o superior
+- Descargar el openapi-generator-cli.jar desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>
+- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar que se ha instalado correctamente.
+- Generar el openapi de go con los siguientes comandos:
+
+```bash
+java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio>   -g go   -o ./go-nrf-client
+```
+
+En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
+
+Para actualizar el NfProfile se utilizó el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs se actualizó el modelo manualmente, comprobando que solo se agregaran nuevas *struct* sin romper las anteriores definidas por Aether.
+
+Puedes visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
+![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
+
+2. Se creó un nuevo release de openapi con el modelo actualizado.
+
+Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se hizo un push con ese tag.
+
+3. Se especifica en cada NF de Aether que deben utilizar la nueva versión de openapi
+
+En cada NF de aether se agregaron las siguientes líneas en el archivo de los modulos de go:
+
+![alt text](imgs/image.png)
+
+Luego se hicieron builds de estas NF para testearlas en el entornos de desarollo
+
+Por último se actualizó el NRF para que llenara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios los puede ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
+
+### WebUI Update
+
+El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta WebUI utilizando el la dirección y puerto que le asigne para este servicio.
+
+### AMF, SMF, NSSF update to release 2.0.0
+
+Estos componentes aún no tenían integrado nuevas funcionalidades como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, se han actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo *release*.
+
 
 ## Entorno de Docker
 
@@ -351,7 +459,7 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
-2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR, NSSF, PCF) y fueron modificadas otras (WebUI, AMF, NRF, SMF). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://gitlab.generalsoftwareinc.com/5g/aether/-/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml?ref_type=heads).
+2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR, NSSF, PCF) ya que sin la definición de su configuración daban problemas al inicializarse los contenedores, y fueron modificadas otras (WebUI, AMF, NRF, SMF) para poder desactivar el cifrado TLS y tener toda la comunicación en HTTP. En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://github.com/networkgcorefullcode/aether-onramp/blob/main/deps/5gc/roles/core/templates/sdcore-5g-values.yaml)
 
 3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** a través del puerto `5001`. Es por eso que cada NF debe tener esta configuración:
 
@@ -715,8 +823,8 @@ kubectl get pods -n sdcore | grep -v webui | grep -v mongodb | grep -v kafka | g
 
 #### Utils
 
-Para habilitar una instancia de MongoDB Express que provea una interfaz web para visualizar fácilmente la base de datos MongoDB, se debe crear y guardar el siguiente manifiesto en el entorno correspondiente.
 
+Para habilitar una instancia de mongodb express que provea una interfaz web para visualizar fácilmente la base de datos mongodb, se puede usar el siguiente manifiesto:
 ```yml
 apiVersion: v1
 kind: Service
@@ -787,6 +895,7 @@ Puertos de los servicios
 | webui              | 30001  | Interfaz para el Webui                    |
 | mongodb-express    | 30081  | Interfaz web para interactuar con mongodb |
 
+
 ### Comandos para eliminar kubernetes
 
 ```bash
@@ -828,300 +937,7 @@ sudo rm -rf $HOME/.config/helm
 sudo rm -rf $HOME/.local/share/helm
 ```
 
-Para ejecutar el user-plane en una instancia EC2 de AWS, seguir los siguientes pasos
 
-1. **Requisitos de red (VPC prerequisites)**
-
-   - Crear una VPC con tres subredes: `mgmt`, `access` y `core`.
-   - Hacer accesibles a internet las subredes `mgmt` y `core`.
-   - Configurar rutas (incluyendo para eNB/gNB si están en on-premise).
-   - Crear interfaces de red (ENIs) para `access` y `core`, desactivar el *source/destination check* en `core` y añadir ruta para la subred de UEs.
-
-2. **Lanzar la instancia EC2**
-
-   - Usar un tipo con **ENA** habilitado (ej. `c5.2xlarge`) y AMI Ubuntu 20.04.
-   - Inicialmente conectar solo la subred `mgmt`, y luego añadir las ENIs de `access` y `core`.
-
-3. **Configurar el sistema operativo**
-
-   - Habilitar **HugePages de 1Gi** modificando GRUB.
-   - Cargar y configurar el driver **vfio-pci** con modo *unsafe IOMMU*.
-   - Asociar las interfaces `access` y `core` al driver vfio-pci usando `driverctl`.
-
-4. **Configurar Kubernetes (K8S)**
-
-   - Instalar **Multus CNI**.
-   - Instalar y configurar el **SR-IOV device plugin** para las interfaces de `access` y `core` (asignadas por PCI).
-   - Verificar recursos disponibles: HugePages y dispositivos SR-IOV.
-   - Instalar el binario `vfioveth` en `/opt/cni/bin`.
-
-5. **Instalar BESS-UPF**
-
-   - Requiere helm chart con licencia de miembros ONF.
-   - Usar un `overriding-values.yaml` con configuración de subredes, direcciones IP, MAC y recursos SR-IOV.
-   - Desplegar con `helm install` y verificar que el pod `upf-0` esté en estado *Running*.
-
-#### Preparación para un entorno EC2 AWS
-
-Preparación del VPC
-
----
-
-1️⃣ Crear la **VPC**
-
-1. Ve a **VPC → Your VPCs → Create VPC**.
-2. Modo: **VPC only**.
-3. Nombre: `upf-vpc`.
-4. IPv4 CIDR: por ejemplo `10.0.0.0/16`.
-5. Crear.
-
----
-
-2️⃣ Crear las **subredes**
-
-Necesitamos **tres subnets** dentro de la misma VPC:
-
-- **mgmt** → para administrar la instancia (acceso SSH, K8s API, etc.)
-- **access** → tráfico hacia/desde gNB/eNB
-- **core** → tráfico hacia el core de red (internet o N6)
-
-Ejemplo:
-
-| Nombre | CIDR        | Zona AZ    |
-| ------ | ----------- | ---------- |
-| mgmt   | 10.0.1.0/24 | us-east-1a |
-| access | 10.0.2.0/24 | us-east-1a |
-| core   | 10.0.3.0/24 | us-east-1a |
-
-En la consola:
-
-1. **VPC → Subnets → Create subnet**
-2. Selecciona `upf-vpc` y crea las 3 subnets con sus CIDRs.
-
----
-
-3️⃣ Hacer accesibles a Internet las subredes **mgmt** y **core**
-
-Hay varias formas:
-
-- Opción fácil: asignarlas a un **Internet Gateway**.
-- Opción del ejemplo: usar **NAT Gateway** en una subred pública.
-
-Ejemplo con NAT Gateway:
-
-1. **VPC → Internet Gateways → Create internet gateway** → Adjuntar a `upf-vpc`.
-2. Crea una **subred pública** extra, ej. `10.0.10.0/24`, con **Auto-assign Public IPv4** habilitado.
-3. **Elastic IPs** → reservar una IP y usarla al crear el NAT Gateway.
-4. **VPC → NAT Gateways → Create NAT Gateway** en la subred pública.
-5. En las **Route Tables** de `mgmt` y `core`:
-
-   - Añadir ruta `0.0.0.0/0` → hacia el **NAT Gateway** esto en las routes table de core
-   - Añadir ruta `0.0.0.0/0` → hacia el **Internet Gateway** esto en las routes table de mgmt
-
----
-
-4️⃣ Configurar rutas para **access**
-
-Si tienes gNB/eNB **on-premise**:
-
-- Ve a **Route Tables** de `access` y añade rutas hacia las redes de las estaciones base, apuntando al gateway correcto (VPN, Direct Connect, etc.).
-
----
-
-5️⃣ Crear **ENIs** para access y core
-
-1. **EC2 → Network Interfaces → Create network interface**.
-
-   - Para `access`: subnet `access`, sin IP pública.
-   - Para `core`: subnet `core`, sin IP pública.
-2. Guarda los **IDs** de cada ENI (los usarás luego para adjuntarlos a la EC2).
-
----
-
-6️⃣ Desactivar **source/destination check** en la ENI de core
-
-Esto permite que la interfaz enrute tráfico que no sea solo para ella.
-
-1. Selecciona la ENI de `core`.
-2. **Actions → Change source/dest. check → Disable**.
-
----
-
-7️⃣ Añadir ruta para la **UE pool subnet**
-
-Esto es para que el tráfico hacia los UEs pase por la interfaz core.
-
-1. Ve a la **Route Table** de la subred pública o la que use el internet/NAT.
-2. Añade ruta:
-
-   - Destination: `SUBRED_UE_POOL` (ej. `10.22.0.128/26`)
-   - Target: **ENI core**.
-
----
-
-Preparación de la instancia EC2
-
----
-
-#### **1️⃣ Lanzar la instancia EC2**
-
-1. Ve a **AWS Console → EC2 → Launch instance**.
-2. **Name**: por ejemplo `ec2-server`.
-3. **AMI**: selecciona **Ubuntu Server 22.04 LTS (64-bit x86)**.
-4. **Instance type**: selecciona **c5.2xlarge** (o cualquier tipo con ENA habilitado y suficiente rendimiento).
-5. **Key pair**: selecciona o crea uno para poder conectarte por SSH.
-
----
-
-#### **2️⃣ Configurar red inicial (solo `mgmt`)**
-
-1. En **Network settings**:
-
-   - **VPC**: selecciona la que creaste (`upf-vpc` o el nombre que tenga).
-   - **Subnet**: elige **solo la subred mgmt** (la que tiene acceso a Internet o NAT Gateway).
-   - **Auto-assign Public IP**: habilitado, para que puedas conectarte por SSH.
-2. En **Security group**:
-
-   - Asegúrate de permitir **SSH (TCP 22)** desde tu IP.
-
----
-
-### 3️⃣ Lanzar y conectarte
-
-- Haz clic en **Launch instance**.
-- Conéctate por SSH a la IP pública:
-
-```bash
-ssh -i tu_clave.pem ubuntu@IP_PUBLICA
-```
-
----
-
-**4️⃣ Crear y adjuntar las ENIs de `access` y `core`**
-
-Esto se hace después de que la instancia está corriendo
-
-1. Ve a **EC2 → Network Interfaces → Create network interface**. Esto se indico en los pasos anteriores
-
-   - **Name**: `eni-access`.
-   - **Subnet**: subred `access`.
-   - **Auto-assign Public IP**: desactivado (solo se necesita en `mgmt`).
-   - Crea otra igual pero para `core` (`eni-core`).
-
-2. **Desactivar Source/Destination Check** en la ENI `core`:
-
-   - Selecciona la ENI `eni-core`.
-   - En **Actions → Change source/dest. check → Disable**.
-
-3. **Adjuntar las ENIs a la instancia**:
-
-   - En la ENI `eni-access`, ve a **Actions → Attach** y elige tu instancia.
-   - Repite para `eni-core`.
-
----
-
-#### 5️⃣ Verificar desde el SO
-
-Dentro de la instancia, ejecuta:
-
-```bash
-ip addr
-```
-
-Deberías ver:
-
-- `ens5` → interfaz de `mgmt` (con IP pública o detrás de NAT).
-- Otra interfaz para `access`.
-- Otra interfaz para `core`.
-
----
-
-Configuracion del sistema
-
-SSH a la máquina virtual y actualiza Grub para habilitar HugePages de 1Gi.
-
-```bash
-$ sudo vi /etc/default/grub
-# Edit grub command line
-GRUB_CMDLINE_LINUX="transparent_hugepage=never default_hugepagesz=1G hugepagesz=1G hugepages=2"
-
-$ sudo update-grub
-```
-
-Carga el controlador vfio-pci y habilita el modo unsafe IOMMU.
-
-``` bash
-sudo su -
-modprobe vfio-pci
-echo "options vfio enable_unsafe_noiommu_mode=1" > /etc/modprobe.d/vfio-noiommu.conf
-echo "vfio-pci" > /etc/modules-load.d/vfio-pci.conf
-reboot
-```
-
-Después de reiniciar, verifica los cambios.
-
-```bash
-$ cat /proc/meminfo | grep Huge
-# AnonHugePages:         0 kB
-# ShmemHugePages:        0 kB
-# FileHugePages:         0 kB
-# HugePages_Total:       2
-# HugePages_Free:        2
-# HugePages_Rsvd:        0
-# HugePages_Surp:        0
-# Hugepagesize:    1048576 kB
-# Hugetlb:         4194304 kB
-
-$ cat /sys/module/vfio/parameters/enable_unsafe_noiommu_mode
-# Y
-```
-
-Por último, asocia las interfaces `access` y `core` al controlador vfio.
-Antes de continuar, toma nota de las direcciones MAC de las dos ENIs, ya sea desde el panel de EC2 o usando el comando `aws ec2 describe-network-interfaces`.
-Estas direcciones MAC son necesarias para identificar la dirección PCI de cada interfaz.
-
-```bash
-# Find interface name of the access and core subnet ENIs by comparing the MAC address
-$ ip link show ens6
-$ ip link show ens7
-
-# Find PCI address of the access and core subnet ENIs
-$ lshw -c network -businfo
-Bus info          Device           Class      Description
-=========================================================
-pci@0000:00:05.0  ens5             network    Elastic Network Adapter (ENA)
-pci@0000:00:06.0  ens6             network    Elastic Network Adapter (ENA) # access in this example
-pci@0000:00:07.0  ens7             network    Elastic Network Adapter (ENA) # core in this example
-
-# Install driverctl
-$ sudo apt update
-$ sudo apt install driverctl
-
-# Check current driver
-$ sudo driverctl -v list-devices | grep -i net
-0000:00:05.0 ena (Elastic Network Adapter (ENA))
-0000:00:06.0 ena (Elastic Network Adapter (ENA))
-0000:00:07.0 ena (Elastic Network Adapter (ENA))
-
-# Bind access and core interfaces to vfio-pci driver
-$ sudo driverctl set-override 0000:00:06.0 vfio-pci
-$ sudo driverctl set-override 0000:00:07.0 vfio-pci
-
-# para revertir
-sudo driverctl unset-override 0000:00:06.0
-sudo driverctl unset-override 0000:00:07.0
-
-# Verify
-$ sudo driverctl -v list-devices | grep -i net
-# 0000:00:05.0 ena (Elastic Network Adapter (ENA))
-# 0000:00:06.0 vfio-pci [*] (Elastic Network Adapter (ENA))
-# 0000:00:07.0 vfio-pci [*] (Elastic Network Adapter (ENA))
-
-$ ls -l /dev/vfio/
-# crw------- 1 root root 242,   0 Aug 17 22:15 noiommu-0
-# crw------- 1 root root 242,   1 Aug 17 22:16 noiommu-1
-# crw-rw-rw- 1 root root  10, 196 Aug 17 21:51 vfio
-```
 
 Configurando k8s
 
@@ -1232,109 +1048,44 @@ $ kubectl get po -n bess-upf
 # upf-0   4/4     Running   0          41h
 ```
 
-## Ejemplos de desarrollo
 
-### NRF (NfProfile Update)
-
-El NRF de las versiones estables de Aether presenta problemas al integrar nuevos perfiles de red, debido a la ausencia de campos que están presentes en releases más modernos del 3GPP. A continuación, se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
-
-Después de analizar todas las alternativas para la actualización del NRF, se determinó que, con solo actualizar el modelo NfProfile, sería posible integrar los nuevos perfiles de red de manera más eficiente. Para ello, se debe generar un nuevo release de OpenAPI con el modelo actualizado y especificar en cada NF de Aether que utilice esta nueva versión de OpenAPI.
-
-Las NF de Aether proporcionan, en el registro de su perfil, el campo NfServices; en releases más recientes, se requiere indicar el campo NfServiceList, el cual puede ser completado por el NRF durante el proceso de registro.
-
-#### Proceso de desarrollo
-
-1. Se actualizó el modelo NfProfile en el repositorio de Aether.
-
-Para ello, se generó el OpenAPI correspondiente utilizando el `openapi-generator-cli`, el cual se encuentra en el repositorio de OpenAPI. En el repositorio `openApiFiles/files` están todos los archivos `.yaml` necesarios para generar el OpenAPI de cada componente. Actualmente, el *Release* 16 contiene todos los archivos `.yml` organizados hasta dicha versión. Puede consultarse en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
-
-En una máquina Ubuntu 22.04 o superior se debe contar con lo siguiente:
-
-- Java 11 o superior.
-- Descargar el archivo `openapi-generator-cli.jar` desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>.
-- Ejecutar el comando `java -jar openapi-generator-cli.jar help` para verificar la instalación.
-- Generar el cliente OpenAPI de Go con los siguientes comandos:
+### Comandos para eliminar kubernetes
 
 ```bash
-java -jar openapi-generator-cli.jar generate -i <ruta_al_yaml_del_servicio> -g go -o ./go-nrf-client
+sudo systemctl stop kubelet
+sudo systemctl stop docker
+
+sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
+sudo apt-get autoremove
+
+# Reiniciar la pc en este paso
+sudo rm -rf ~/.kube
+sudo rm -rf /etc/kubernetes/
+sudo rm -rf /var/lib/etcd/
+sudo rm -rf /var/lib/kubelet/
+sudo rm -rf /var/lib/dockershim/
+sudo rm -rf /var/run/kubernetes/
+sudo rm -rf /etc/cni/
+sudo rm -rf /opt/cni/
+sudo rm -rf /opt/local-path-provisioner
+
+sudo docker system prune -a --volumes
+
+kubectl version
+# Debe decir comando no encontrado
+
+kubeadm version
+# Debe decir comando no encontrado
+
+sudo rm -rf $HOME/.cache/helm
+sudo rm -rf $HOME/.config/helm
+sudo rm -rf $HOME/.local/share/helm
 ```
 
-En `openApiFiles/openApiGeneratorOutputs/go-nrf-client` se encuentran todos los archivos generados del cliente de Go correspondiente al NRF para el servicio Nnrf_NFManagement.
-
-Para actualizar el NfProfile se utilizó el modelo generado por OpenAPI Generator. Inicialmente, se cometió el error de copiar y pegar los nuevos modelos generados como una opción de desarrollo más rápida, lo que introdujo una serie de errores que provocaron cambios en la estructura original de Aether. El OpenAPI Generator crea structs y métodos utilizando una plantilla común; en ocasiones, el código generado no era compatible con las necesidades de Aether, por lo que se realizaron modificaciones manuales según los requerimientos. Para evitar estos errores, se actualizó el modelo manualmente, asegurando que solo se agregaran nuevas *structs* sin afectar las previamente definidas por Aether.
-
-Se pueden consultar los siguientes commits donde se realizaron todos los cambios necesarios en el modelo de OpenAPI:
-![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
-
-2. Se creó un nuevo release de OpenAPI con el modelo actualizado.
-
-Este paso fue sencillo; simplemente se creó un nuevo tag en la rama `main` y se realizó un push con dicho tag.
-
-3. Se especificó en cada NF de Aether que deben utilizar la nueva versión de OpenAPI.
-
-En cada NF de Aether se agregaron las siguientes líneas en el archivo de los módulos de Go:
-
-![alt text](imgs/image.png)
-
-Posteriormente, se realizaron builds de estas NF para probarlas en los entornos de desarrollo.
-
-Finalmente, se actualizó el NRF para que completara el campo `NfServiceList` en caso de que no fuera recibido por parte de la NF. Los cambios pueden consultarse aquí: [Enlace al commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
-
-### WebUI Update
-
-El WebUI tiene la capacidad de mostrar y gestionar información a través de una página web. Haciendo uso de inteligencia artificial, se creó una página web para agregar esta funcionalidad; además, se realizaron modificaciones en la construcción de la imagen de Docker para habilitar dicha característica. Se puede acceder a este WebUI utilizando la dirección y el puerto asignados para este servicio.
-
-### AMF, SMF, NSSF update to release 2.0.0
-
-Estos componentes aún no tenían integradas nuevas funcionalidades, como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether implementó recientemente nuevas características para estos componentes; se han actualizado manualmente para agregar dichas funcionalidades. Estos cambios aún están en desarrollo y en sus respectivas ramas, donde serán probados y posteriormente lanzados en un nuevo *release*.
-
-### Implementación de una conexión manual
-
-Para interoperar entre componentes de diferentes cores Aether todavía presenta varias limitantes. Como una primera solución a corto plazo proponemos habilitar la configuración manual de las conexiones entre los diferentes componentes. En nuestros repositorios estamos trabajando en esta dirección. Para esta funcionalidad se estudió cada uno de las NFs de Aether buscando las instancias que realizan la función de descovery NFs instances. Estas imagenes a continuación muestran los cambios realizados en el AMF, los mismos fueron implementados en PCF, NSSF, AUSF, UDM, UDR, que son las otras NF que implementan el descubrimiento de instancias.
-
-Primero en el paquete factory (el responsable de manejar las configuraciones de las NF de aether) se agregaron en la struct Configuration una nueva struct llamada `ManualConfigs`. Ver la siguiente imagen.
-
-![alt text](imgs/image1231.png)
-
-`ManualConfigs` es una struct relativamente sencilla tiene dos campos uno que es un mapa que relaciona instancia de un determinado tipo con una lista de los profiles de dichas instancias, aqui estamos definiendo manualmente el NfProfile de las , el otro campo permite habilitar esta funcionalidad o deshabilitarla. Ver la siguiente imagen
-
-![alt text](imgs/image12312312.png)
-
-Después la siguiente implementación se realizó en la función encargada de obtener las NfInstances. Ver la siguiente imagen.
-
-![alt text](imgs/image1.png)
-> En el primer bloque condicional habilitamos la búsqueda de configuraciones manuales, si no se obtiene ningun resultado o hay algún error entonces se utilizan los otros métodos existentes
-
-La última función implementada permite obtener las instancias de NF de manera manual, utilizando las configuraciones definidas en `ManualConfigs`. Ver la siguiente imagen.
-
-![alt text](imgs/image2.png)
-> Primero verifica si la configuración manual (manualConfig) es nula; si lo es, retorna un resultado vacío. Si no, crea un resultado (SearchResult) y agrega las instancias NF del tipo objetivo (targetNfType) desde la configuración manual.
-> Luego, si se pasan parámetros de búsqueda (param), filtra las instancias NF por el SUPI (identificador de suscriptor) usando la función filterNfInstancesBySupi. Esta función recorre las instancias NF y, dependiendo del tipo de NF, verifica si el SUPI está dentro de los rangos definidos en la información específica de cada NF. Si encuentra una coincidencia, agrega la instancia filtrada al resultado.
-> Puntos clave: El filtrado por SUPI solo ocurre si se proporciona el parámetro. El filtrado depende del tipo de NF y de los rangos de SUPI definidos en la configuración. Si no hay coincidencias, el resultado puede estar vacío.
-
-Como se mencionó anteriormente, este proceso se repitió tal cual en PCF, NSSF, AUSF, UDM y UDR. Por último se hicieron builds de cada uno de estas NFs, también se modificó OnRamp para este caso de uso. Se hizo una simulación donde le habilitamos esta funcionalidad al AMF y se verificó su correcto funcionamiento, donde el AMF buscaba en la configuración manual y obtenía los parámetros necesarios para comunicarse con las instancias correspondientes, el yaml proporcionado luce así.
-
-![alt text](imgs/image3.png)
-
-Para la integración de la configuración manual deberemos asegurarnos de:
-
-- Proporcionar los endpoints correctos en nuestro caso de uso utilizamos el fqdn de los servicios internos.
-- Asegurarnos de que las instancias a las cuales hacemos referencia estén disponibles, como una posible solución podremos hacer un health check de las mismas, que verifique si la conectividad es correcta y ajuste los estados dinamicamente.
-
-Posibilidades:
-
-- Conexión directa entre componentes evitando los procedimientos relacionados con el NRF.
-- Reducción de la latencia en la comunicación entre componentes.
-- Mejora en la interoperabilidad entre diferentes versiones de Aether.
-- La opción de comunicación con otros core los cuales tienen los datos de autenticación de nuestros usuarios.
-
-Contras:
-
-- Agrega una complejidad adicional en la gestión de los sistemas, siendo dificil de mantener a gran escala.
 
 ## Pruebas de simulación y trazas de logs de registro
 
-Utilizando el entorno de desarrollo, se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla como se llevo a cabo este proceso.
+Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla como se llevo a cabo este proceso.
 
 ### Configuraciones previas
 
