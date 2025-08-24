@@ -5,6 +5,7 @@
 - [Informe Técnico](#informe-técnico)
   - [Índice](#índice)
   - [Introducción](#introducción)
+  - [Siglario de términos](#siglario-de-términos)
   - [Configuración del entorno de desarrollo](#configuración-del-entorno-de-desarrollo)
     - [Pasos iniciales](#pasos-iniciales)
     - [Instalaciones necesarias](#instalaciones-necesarias)
@@ -34,7 +35,7 @@
       - [6. **Configurar el entorno para el usuario actual**](#6-configurar-el-entorno-para-el-usuario-actual)
       - [7. **Instalar red de pods (ej. Calico)**](#7-instalar-red-de-pods-ej-calico)
       - [8. **Permitir que el nodo actúe como master y worker (modo prueba)**](#8-permitir-que-el-nodo-actúe-como-master-y-worker-modo-prueba)
-      - [9. **Verifica que todo está funcionando**](#9-verifica-que-todo-está-funcionando)
+      - [9. **Verificar que todo está funcionando**](#9-verificar-que-todo-está-funcionando)
     - [Trabajando con Helm](#trabajando-con-helm)
       - [Instalando Helm](#instalando-helm)
       - [Obtener y operar charts](#obtener-y-operar-charts)
@@ -43,12 +44,15 @@
   - [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
     - [Configuraciones previas](#configuraciones-previas)
       - [Despliegue de Aether  y UERANSIM](#despliegue-de-aether--y-ueransim)
+    - [Prueba 1. Registro de NFs nativas de Aether en el NRF de Aether](#prueba-1-registro-de-nfs-nativas-de-aether-en-el-nrf-de-aether)
+    - [Evaluación final de la Prueba 1](#evaluación-final-de-la-prueba-1)
+    - [Prueba 2. Registro del UDM de Open5GS en el NRF de Aether](#prueba-2-registro-del-udm-de-open5gs-en-el-nrf-de-aether)
       - [Simulación](#simulación)
       - [Cambio en la configuracion del *service* `nrf`](#cambio-en-la-configuracion-del-service-nrf)
       - [Instalación de Docker y Docker Compose](#instalación-de-docker-y-docker-compose)
       - [Despliegue del UDM de Open5GS](#despliegue-del-udm-de-open5gs)
       - [Evidencia de registro en los logs](#evidencia-de-registro-en-los-logs)
-  - [Evaluación final y recomendaciones](#evaluación-final-y-recomendaciones)
+    - [Evaluación final de la Prueba 2 y recomendaciones](#evaluación-final-de-la-prueba-2-y-recomendaciones)
 
 ## Introducción
 
@@ -71,6 +75,53 @@ El **alcance** de este informe comprende:
 - La recolección de evidencia de los cambios realizados, mediante el análisis de logs obtenidos en pruebas de simulación.
 
 Con ello, el documento proporciona una visión clara y ordenada del proceso seguido para resolver el problema identificado en el NRF, garantizando la trazabilidad de los cambios y su validación en diferentes escenarios.
+
+---
+
+## Siglario de términos
+
+| Sigla | Nombre en español | Término en inglés |
+| :--- | :--- | :--- |
+| **3GPP** | Proyecto de Asociación de Tercera Generación | 3rd Generation Partnership Project |
+| **AMF** | Función de Gestión de Acceso y Movilidad | Access and Mobility Management Function |
+| **AUSF** | Función de Servidor de Autenticación | Authentication Server Function |
+| **CNI** | Interfaz de Red de Contenedores | Container Network Interface |
+| **CPU** | Unidad Central de Procesamiento | Central Processing Unit |
+| **CRD** | Definición de Recurso Personalizado | Custom Resource Definition |
+| **DS** | DaemonSet | DaemonSet |
+| **GIN** | Framework Web Gin | Gin Web Framework |
+| **GNB** | Nodo B de Nueva Generación | gNodeB |
+| **HTTP** | Protocolo de Transferencia de Hipertexto | Hypertext Transfer Protocol |
+| **IP** | Protocolo de Internet | Internet Protocol |
+| **K8S** | Kubernetes | Kubernetes |
+| **LTS** | Soporte a Largo Plazo | Long-Term Support |
+| **NAS** | Estrato de No Acceso | Non-Access Stratum |
+| **NF** | Función de Red | Network Function |
+| **NGAP** | Protocolo de Aplicación de Nueva Generación | Next-Generation Application Protocol |
+| **NRF** | Función de Repositorio de Red | Network Repository Function |
+| **NSSF** | Función de Selección de Slice de Red | Network Slice Selection Function |
+| **OpenAPI** | Especificación OpenAPI | OpenAPI Specification |
+| **PCF** | Función de Control de Políticas | Policy Control Function |
+| **PDU** | Unidad de Datos de Protocolo | Protocol Data Unit |
+| **PLMN** | Red Móvil Terrestre Pública | Public Land Mobile Network |
+| **PSI** | Identidad de Sesión PDU | PDU Session Identity |
+| **RAM** | Memoria de Acceso Aleatorio | Random Access Memory |
+| **RRC** | Control de Recursos de Radio | Radio Resource Control |
+| **SCTP** | Protocolo de Transmisión de Control de Flujo | Stream Control Transmission Protocol |
+| **SMF** | Función de Gestión de Sesión | Session Management Function |
+| **SO** | Sistema Operativo | Operating System |
+| **SSH** | Secure Shell | Secure Shell |
+| **SVC** | Servicio | Service |
+| **TLS** | Seguridad de la Capa de Transporte | Transport Layer Security |
+| **TUN** | Interfaz de Túnel | Tunnel Interface |
+| **UDM** | Gestión Unificada de Datos | Unified Data Management |
+| **UDR** | Repositorio Unificado de Datos | Unified Data Repository |
+| **UE** | Equipo de Usuario | User Equipment |
+| **UERANSIM** | Simulador de UE y RAN | UE and RAN Simulator |
+| **UID** | Identificador Único | Unique Identifier |
+| **VM** | Máquina Virtual | Virtual Machine |
+| **WebUI** | Interfaz de Usuario Web | Web User Interface |
+| **YAML** | YAML Ain't Markup Language | YAML Ain't Markup Language |
 
 ---
 
@@ -126,7 +177,7 @@ mkdir aether-forks
 cd aether-forks
 ```
 
-Crear aquí el archivo `python_get_repos.py`:
+Se debe crear aquí el archivo `python_get_repos.py`:
 
 ```bash
 touch python_get_repos.py
@@ -161,7 +212,7 @@ Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles
 
 ### Construir componentes
 
-Crear el script `build_components.sh`:
+Se debe crear aquí el script `build_components.sh`:
 
 ```bash
 touch build_components.sh
@@ -189,7 +240,7 @@ Ejecutar el script para crear los builds de cada componente:
 
 ### Obtener builds
 
-Crear el script `get_builds.sh`:
+e debe crear aquí el script `get_builds.sh`:
 
 ```bash
 touch get_builds.sh
@@ -250,19 +301,19 @@ De esta forma, es posible probar cada componente de manera individual y verifica
 
 ### NRF (NfProfile Update)
 
-El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que estan presentes en release más modernos del 3GPP. A continuación se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
+El NRF de las versiones estables de Aether, presenta problemas a la hora de integrar nuevos perfiles de red, debido a que faltaban campos que están presentes en releases más modernos del 3GPP (3rd Generation Partnership Project). A continuación se describe el proceso de desarrollo para la actualización del NRF y del modelo NfProfile.
 
-Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se deberia hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF de Aether que deberían utilizar esta nueva versión de openapi actualizada.
+Después de estudiar todas las alternativas para la actualización del NRF se decidió que con actualizar el modelo NfProfile se podrían integrar los nuevos perfiles de red de manera más eficiente, simplemente se debería hacer un nuevo release de openapi con este modelo actualizado y especificar en cada NF (Network Function) de Aether que deberían utilizar esta nueva versión de openapi actualizada.
 
-Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y en releases más modernos se debe indicar el campo NfServiceList, este campo lo puede completar el NRF en el proceso de registro.
+Las NF de Aether proporcionan en el registro de su perfil el campo NfServices y en releases más modernos como por ejemplo el Release 16, se debe indicar el campo NfServiceList, este campo puede ser completado por el NRF en el proceso de registro.
 
 #### Proceso de desarrollo
 
 1. Se actualizó el modelo NfProfile en el repositorio de Aether.
 
-Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repo de openapi. En el repo de  openApiFiles/files están todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el *Release* 16 tiene todos los .yml organizados hasta el *Release* 16. Se puede ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
+Para esto se generó el openapi correspondiente utilizando el openapi-generator-cli, el cual se encuentra en el repositorio de openapi. En el repositorio de  openApiFiles/files están todos los .yaml necesarios para generar el openapi de cada componente. En la actualidad el *Release* 16 tiene todos los .yml organizados hasta el *Release* 16. Se puede ver en <https://www.3gpp.org/ftp/specs/archive/OpenAPI/Rel-16>.
 
-En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
+En una VM ubuntu 22.04 o superior se debe tener lo siguiente siguiente:
 
 - Java 11 o superior
 - Descargar el openapi-generator-cli.jar desde <https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.6.0/openapi-generator-cli-7.6.0.jar>
@@ -273,34 +324,34 @@ En una maquina ubuntu 22.04 o superior debes tener lo siguiente siguiente:
 java -jar openapi-generator-cli.jar generate   -i <path_a_tu_yaml_del_servicio>   -g go   -o ./go-nrf-client
 ```
 
-En openApiFiles/openApiGeneratorOutputs/go-nrf-client estan todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
+En openApiFiles/openApiGeneratorOutputs/go-nrf-client están todos los archivos generados del cliente de go correspondiente al NRF para el servicio Nnrf_NFManagement.
 
-Para actualizar el NfProfile se utilizó el modelo generado por openapi generator, al se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de bugs que provocaban varios cambios en la estructura original de Aether. El openapi generator genera structs y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos bugs se actualizó el modelo manualmente, comprobando que solo se agregaran nuevas *struct* sin romper las anteriores definidas por Aether.
+Para actualizar el NfProfile se utilizó el modelo generado por openapi generator, se cometió un error que fue copiar y pegar los nuevos modelos generados, como una opción de desarrollo más rápida, pero esto introdujo una serie de *bugs* que provocaban varios cambios en la estructura original de Aether. El openapi generator genera *structs* y métodos utilizando una plantilla en común, a veces el código que genera no era lo que necesitaba Aether y se hacían modificaciones manuales según las necesidades. Entonces para evitar estos *bugs* se actualizó el modelo manualmente, comprobando que solo se agregaran nuevas *struct* sin romper las anteriores definidas por Aether.
 
-Puedes visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
+Se pueden visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
 ![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
 
 2. Se creó un nuevo release de openapi con el modelo actualizado.
 
-Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se hizo un push con ese tag.
+Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se realizó un push con ese tag.
 
-3. Se especifica en cada NF de Aether que deben utilizar la nueva versión de openapi
+3. Se especificó en cada NF de Aether que deben utilizar la nueva versión de openapi
 
 En cada NF de aether se agregaron las siguientes líneas en el archivo de los modulos de go:
 
 ![alt text](imgs/image.png)
 
-Luego se hicieron builds de estas NF para testearlas en el entornos de desarollo
+Luego se realizaron *builds* de estas NF para probarlas en el entorno de desarollo.
 
-Por último se actualizó el NRF para que llenara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios los puede ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
+Por último se actualizó el NRF para que completara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios se pueden ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
 
 ### WebUI Update
 
-El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creo una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de docker para habilitar esta funcionalidad. Puede acceder a esta WebUI utilizando el la dirección y puerto que le asigne para este servicio.
+El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creó una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de Docker para habilitar esta funcionalidad. Se puede a esta WebUI utilizando  la dirección y puerto que se le asigne para este servicio.
 
 ### AMF, SMF, NSSF update to release 2.0.0
 
-Estos componentes aún no tenían integrado nuevas funcionalidades como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, se han actualizado manualmente para agregarle estas nuevas características, estos cambios aún estan en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo *release*.
+Estos componentes aún no tenían integradas nuevas funcionalidades como el *polling* HTTP al WebUI para obtener parámetros de configuración. Aether recientemente implementó nuevas funcionalidades para estos componentes, se han actualizado manualmente para agregar estas nuevas características, estos cambios aún están en desarrollo y en sus ramas, donde serán probados y luego lanzados en nuevo *release*.
 
 
 ## Entorno de Docker
@@ -386,18 +437,18 @@ DOCKER_REGISTRY ?= 192.168.12.15:8083/
 DOCKER_REPOSITORY ?= omecproject/
 ```
 
-- `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus en los servidores de la empresa.
+- `DOCKER_REGISTRY` se configuró con el valor del registry privado de Docker que se encuentra desplegado en un servidor Nexus.
 - `DOCKER_REPOSITORY` se configuró con el nombre del repositorio por defecto de Aether SD-Core.
 
-3. Hacer un `docker build` para construir las imágenes y luego un `docker push` para subirlas al registry. Para hacer el *push* es necesario primero iniciar sesión en el Nexus con `docker login 192.168.12.15:8083`.
-
+1. Ejecutar el comando `make docker-build` para construir las imágenes usando el *target* definido en el Makefile, y luego un `docker push` para subirlas al registry especificado.
+   
 Todos estos pasos pueden adaptarse según la conveniencia de cada usuario, como usar una versión diferente o subir las imágenes a otro registry de Docker.
 
 ### Configuración del *values* de Helm
 
 El archivo de *values* de Helm se encuentra en la siguiente ruta, partiendo desde el directorio raíz del repositorio de Aether OnRamp: `/deps/5gc/roles/core/templates/sdcore-5g-values.yaml`.
 
-En este archivo se hicieron varias configuraciones:
+En este archivo se realizaron varias configuraciones:
 
 1. El despliegue se configuró para descargar las imágenes actualizadas del *registry* privado en Nexus de la siguiente manera:
 
@@ -457,7 +508,7 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
-2. Se añadieron configuraciones para varias NFs (AUSF, UDM, UDR, NSSF, PCF) ya que sin la definición de su configuración daban problemas al inicializarse los contenedores, y fueron modificadas otras (WebUI, AMF, NRF, SMF) para poder desactivar el cifrado TLS y tener toda la comunicación en HTTP. En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa puede acceder al archivo [aquí](https://github.com/networkgcorefullcode/aether-onramp/blob/main/deps/5gc/roles/core/templates/sdcore-5g-values.yaml)
+2. Se añadieron configuraciones para varias NFs como por ejemplo: AUSF (Authentication Server Function), UDM (Unified Data Management), UDR (Unified Data Repository), NSSF (Network Slice Selection Function) y  PCF (Policy Control Function), ya que sin la definición de su configuración daban problemas al inicializarse los contenedores, y fueron modificadas otras como el WebUI, AMF (Access and Mobility Function), NRF y SMF (Session Management Function)  para poder desactivar el cifrado TLS (Transport Layer Security) y tener toda la comunicación en HTTP (Hypertext Transfer Protocol). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa se puede acceder al archivo [aquí](https://github.com/networkgcorefullcode/aether-onramp/blob/main/deps/5gc/roles/core/templates/sdcore-5g-values.yaml)
 
 3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** a través del puerto `5001`. Es por eso que cada NF debe tener esta configuración:
 
@@ -675,7 +726,7 @@ Esto es necesario si solo tienes **una máquina** y quieres que los pods de usua
 
 ---
 
-#### 9. **Verifica que todo está funcionando**
+#### 9. **Verificar que todo está funcionando**
 
 ```bash
 kubectl get nodes
@@ -692,7 +743,7 @@ Figura ##. Pods de Kubernetes en estado **Running**
 
 #### Instalando Helm
 
-Ejecute los siguientes comandos para instalar Helm:
+Ejecutar los siguientes comandos para instalar Helm:
 
 ```bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -937,7 +988,7 @@ sudo rm -rf $HOME/.local/share/helm
 
 
 
-Configurando k8s
+Configurando Kubernetes
 
 La instalación de Kubernetes (K8S) está fuera del alcance de esta guía. Una vez que K8S esté listo en la máquina virtual, se debe instalar `Multus` y `sriov-device-plugin`.
 
@@ -986,7 +1037,7 @@ $ kubectl get ds -n kube-system kube-sriov-device-plugin-amd64
 # kube-sriov-device-plugin-amd64   1         1         1       1            1
 ```
 
-Verifica los recursos asignables en el nodo. Asegúrate de que haya 2 HugePages de 1Gi, 1 `intel_sriov_vfio_access` y 1 `intel_sriov_vfio_core`.
+Verificar los recursos asignables en el nodo. Se debe asegurar de que haya 2 HugePages de 1Gi, 1 `intel_sriov_vfio_access` y 1 `intel_sriov_vfio_core`.
 
 ```bash
 sudo apt update
@@ -1005,7 +1056,7 @@ $ kubectl get node  -o json | jq '.items[].status.allocatable'
 # }
 ```
 
-Por último, copia el binario `vfioveth` de CNI en la ruta `/opt/cni/bin` dentro de la máquina virtual.
+Por último, copiar el binario `vfioveth` de CNI en la ruta `/opt/cni/bin` dentro de la máquina virtual.
 
 ```bash
 sudo wget -O /opt/cni/bin/vfioveth https://raw.githubusercontent.com/opencord/omec-cni/master/vfioveth
@@ -1014,11 +1065,11 @@ sudo chmod +x /opt/cni/bin/vfioveth
 
 Instalando bess upf con Helm
 
-En el repo helm-charts hay una rama llamada deploy-ec2, aqui estan los helm-charts modificados, para que todo funcione correctamente en la instancia EC2.
+En el repositorio helm-charts hay una rama llamada deploy-ec2, aquí están los helm-charts modificados, para que todo funcione correctamente en la instancia EC2.
 
-A continuacion edita overriding-values.yaml según tus ip y macs (utiliza vim o nano, tu editor de texto de preferencia).
+A continuación se debe editr overriding-values.yaml según las IP y MACs (utilizando `vim`, `nano` o ==el== editor de texto de preferencia).
 
-Verás algo como esto:
+Se verá algo como esto:
 
 ```yml
 config:
@@ -1049,11 +1100,11 @@ $ kubectl get po -n bess-upf
 
 ## Pruebas de simulación y trazas de logs de registro
 
-Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla como se llevo a cabo este proceso.
+Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla cómo se llevó a cabo este proceso.
 
 ### Configuraciones previas
 
-Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde seran desplegados Aether y el simulador UERANSIM.
+Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde serán desplegados Aether y el simulador UERANSIM.
 
 `vars/main.yml`
 
@@ -1128,11 +1179,158 @@ Para desplegar UERANSIM se corre el comando:
 make aether-ueransim-install
 ```
 
+### Prueba 1. Registro de NFs nativas de Aether en el NRF de Aether
+
+Una vez desplegado correctamente Aether SD-Core se pueden revisar los logs del NRF para ver los registros de las funciones de red el propio núcleo 5G con el siguiente comando:
+```bash
+kubectl logs -n aether-5gc <NRF_pod_name>
+```
+
+Resultado del comando anterior:
+
+```
+2025-08-24T16:31:03.449Z	INFO	nrf/nrf.go:28	nrf	{"component": "NRF", "category": "Init"}
+2025-08-24T16:31:03.452Z	INFO	service/init.go:107	NRF Log level is set to [info] level	{"component": "NRF", "category": "Init"}
+2025-08-24T16:31:03.454Z	INFO	logger/logger.go:71	set log level: info	{"component": "NRF", "category": "Init"}
+2025-08-24T16:31:03.454Z	INFO	logger/logger.go:65	set log level: info	{"component": "LIB", "category": "Util"}
+2025-08-24T16:31:03.454Z	INFO	factory/factory.go:53	config version [1.0.0]	{"component": "NRF", "category": "CFG"}
+2025-08-24T16:31:03.454Z	INFO	context/context.go:22	nrfconfig Info: Version[1.0.0] Description[NRF initial local configuration]	{"component": "NRF", "category": "Init"}
+2025-08-24T16:31:03.454Z	INFO	service/init.go:159	server started	{"component": "NRF", "category": "Init"}
+2025-08-24T16:31:03.466Z	INFO	dbadapter/dbadapter.go:52	MongoDB Connection Successful	{"component": "NRF", "category": "App"}
+2025-08-24T16:31:03.466Z	INFO	dbadapter/dbadapter.go:77	NfProfile document expiry enabled	{"component": "NRF", "category": "App"}
+2025-08-24T16:31:33.500Z	INFO	dbadapter/dbadapter.go:83	ttl Index exists for field 'expireAt' in collection 'NfProfile'	{"component": "NRF", "category": "App"}
+2025-08-24T16:31:33.500Z	INFO	service/init.go:182	binding addr: [0.0.0.0:29510]	{"component": "NRF", "category": "Init"}
+2025-08-24T16:32:29.885Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:29.885Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.039Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.321Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.334Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/96638fc1-7511-4b50-8260-dcd0c195ff10	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.335Z	INFO	logger/logger.go:91	| 201 |      10.42.0.74 | PUT     | /nnrf-nfm/v1/nf-instances/96638fc1-7511-4b50-8260-dcd0c195ff10 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:30.360Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.360Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.404Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.437Z	INFO	producer/nf_management.go:527	Create NF Profile  NSSF	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.438Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/d9c17bb1-fc10-4346-abb8-725681d63af7	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:30.438Z	INFO	logger/logger.go:91	| 201 |      10.42.0.75 | PUT     | /nnrf-nfm/v1/nf-instances/d9c17bb1-fc10-4346-abb8-725681d63af7 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:35.430Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:35.430Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:35.592Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:35.675Z	INFO	producer/nf_management.go:527	Create NF Profile  PCF	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:35.676Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/ce9b1a86-493e-411b-935c-089de3cbb7b2	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:35.676Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | PUT     | /nnrf-nfm/v1/nf-instances/ce9b1a86-493e-411b-935c-089de3cbb7b2 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:35.678Z	INFO	producer/nf_discovery.go:32	Handle NFDiscoveryRequest	{"component": "NRF", "category": "DSCV"}
+2025-08-24T16:32:35.713Z	INFO	logger/logger.go:91	| 200 |      10.42.0.62 | GET     | /nnrf-disc/v1/nf-instances?requester-nf-type=PCF&service-names=nudr-dr&target-nf-type=UDR | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:35.714Z	INFO	producer/nf_management.go:182	Handle CreateSubscriptionRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:36.163Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | POST    | /nnrf-nfm/v1/subscriptions | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:37.514Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:37.514Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:37.546Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:37.623Z	INFO	producer/nf_management.go:527	Create NF Profile  AUSF	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:37.624Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/4f10cd39-fbd2-4599-a680-e20cced65a7c	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:37.624Z	INFO	logger/logger.go:91	| 201 |      10.42.0.57 | PUT     | /nnrf-nfm/v1/nf-instances/4f10cd39-fbd2-4599-a680-e20cced65a7c | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:38.870Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:38.870Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:38.871Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:38.890Z	INFO	producer/nf_management.go:508	RestfulAPIPutOne True Insert	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:38.891Z	INFO	logger/logger.go:91	| 201 |      10.42.0.75 | PUT     | /nnrf-nfm/v1/nf-instances/d9c17bb1-fc10-4346-abb8-725681d63af7 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:39.224Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:39.224Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:39.245Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:39.276Z	INFO	producer/nf_management.go:527	Create NF Profile  SMF	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:39.277Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/9fe84417-3a88-4f0c-8024-08ea0b5c48ac	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:39.277Z	INFO	logger/logger.go:91	| 201 |      10.42.0.53 | PUT     | /nnrf-nfm/v1/nf-instances/9fe84417-3a88-4f0c-8024-08ea0b5c48ac | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:40.244Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:40.244Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:40.271Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:40.300Z	INFO	producer/nf_management.go:508	RestfulAPIPutOne True Insert	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:40.301Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | PUT     | /nnrf-nfm/v1/nf-instances/ce9b1a86-493e-411b-935c-089de3cbb7b2 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:40.301Z	INFO	producer/nf_discovery.go:32	Handle NFDiscoveryRequest	{"component": "NRF", "category": "DSCV"}
+2025-08-24T16:32:40.301Z	INFO	logger/logger.go:91	| 200 |      10.42.0.62 | GET     | /nnrf-disc/v1/nf-instances?requester-nf-type=PCF&service-names=nudr-dr&target-nf-type=UDR | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:40.884Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:40.884Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:41.012Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:41.030Z	INFO	producer/nf_management.go:527	Create NF Profile  UDR	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:41.031Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/e4f9cf12-5e83-4717-a220-99c55b631ed5	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:41.032Z	INFO	logger/logger.go:91	| 201 |      10.42.0.70 | PUT     | /nnrf-nfm/v1/nf-instances/e4f9cf12-5e83-4717-a220-99c55b631ed5 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:42.287Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:42.287Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:42.372Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:42.392Z	INFO	producer/nf_management.go:527	Create NF Profile  AMF	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:42.394Z	INFO	producer/nf_management.go:542	Location header:  https://nrf:29510/nnrf-nfm/v1/nf-instances/37ba245d-b814-4af1-a8f6-73477a6a9d83	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:42.394Z	INFO	logger/logger.go:91	| 201 |      10.42.0.61 | PUT     | /nnrf-nfm/v1/nf-instances/37ba245d-b814-4af1-a8f6-73477a6a9d83 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:47.403Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.404Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.406Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.408Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.408Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.412Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.412Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.428Z	INFO	producer/nf_management.go:508	RestfulAPIPutOne True Insert	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.455Z	INFO	logger/logger.go:91	| 201 |      10.42.0.75 | PUT     | /nnrf-nfm/v1/nf-instances/d9c17bb1-fc10-4346-abb8-725681d63af7 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:47.469Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.469Z	INFO	context/management_data.go:484	urilist update	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.492Z	INFO	producer/nf_management.go:508	RestfulAPIPutOne True Insert	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.492Z	INFO	producer/nf_management.go:508	RestfulAPIPutOne True Insert	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.493Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | PUT     | /nnrf-nfm/v1/nf-instances/ce9b1a86-493e-411b-935c-089de3cbb7b2 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:47.493Z	INFO	producer/nf_discovery.go:32	Handle NFDiscoveryRequest	{"component": "NRF", "category": "DSCV"}
+2025-08-24T16:32:47.494Z	INFO	logger/logger.go:91	| 201 |      10.42.0.61 | PUT     | /nnrf-nfm/v1/nf-instances/37ba245d-b814-4af1-a8f6-73477a6a9d83 | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:47.494Z	INFO	logger/logger.go:91	| 200 |      10.42.0.62 | GET     | /nnrf-disc/v1/nf-instances?requester-nf-type=PCF&service-names=nudr-dr&target-nf-type=UDR | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:47.494Z	INFO	producer/nf_management.go:182	Handle CreateSubscriptionRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:47.558Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | POST    | /nnrf-nfm/v1/subscriptions | 	{"component": "NRF", "category": "GIN"}
+2025-08-24T16:32:57.215Z	INFO	producer/nf_management.go:64	Handle NFRegisterRequest	{"component": "NRF", "category": "MGMT"}
+2025-08-24T16:32:57.215Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
+```
+
+En los logs anteriores se puede ver la creación del `NF Profile` para cada función de red, y por tanto su registro. 
+
+**UDM**
+```
+2025-08-24T16:32:30.321Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
+```
+
+**NSSF**
+```
+2025-08-24T16:32:30.437Z	INFO	producer/nf_management.go:527	Create NF Profile  NSSF	{"component": "NRF", "category": "MGMT"}
+```
+
+**PCF**
+```
+2025-08-24T16:32:35.675Z	INFO	producer/nf_management.go:527	Create NF Profile  PCF	{"component": "NRF", "category": "MGMT"}
+```
+
+**AUSF**
+```
+2025-08-24T16:32:37.623Z	INFO	producer/nf_management.go:527	Create NF Profile  AUSF	{"component": "NRF", "category": "MGMT"}
+```
+
+**SMF**
+```
+2025-08-24T16:32:39.276Z	INFO	producer/nf_management.go:527	Create NF Profile  SMF	{"component": "NRF", "category": "MGMT"}
+```
+
+**UDR**
+```
+2025-08-24T16:32:41.030Z	INFO	producer/nf_management.go:527	Create NF Profile  UDR	{"component": "NRF", "category": "MGMT"}
+```
+
+**AMF**
+```
+2025-08-24T16:32:42.392Z	INFO	producer/nf_management.go:527	Create NF Profile  AMF	{"component": "NRF", "category": "MGMT"}
+```
+
+
+### Evaluación final de la Prueba 1
+
+En la prueba anterior se demostró que el NRF de Aether SD-Core, con los cambios hechos en su código fuente, sigue siento totalmente funcional y capaz de registrar las funciones de red nativas de su Core 5G.
+
+
+### Prueba 2. Registro del UDM de Open5GS en el NRF de Aether
+
 #### Simulación
 
-Para correr la simulación con UERANSIM se debe entrar por ssh a la VM del simulador, y en la carpeta `ueransim/build` correr los siguientes comandos.
+Para correr la simulación con UERANSIM se debe entrar por SSH (Secure Shell) a la VM del simulador, y en la carpeta `ueransim/build` ejecutar los siguientes comandos.
 
-Para simular la `gnb`:
+Para simular la `gnb` (Estación Base 5G):
 
 ```bash
 ./nr-gnb -c ../config/custom-gnb.yaml
@@ -1161,7 +1359,7 @@ UERANSIM v3.2.7
 [2025-08-13 15:56:13.355] [ngap] [info] PDU session resource(s) setup for UE[2] count[1]
 ```
 
-Para simular el UE:
+Para simular el UE (User Equipment):
 
 ```bash
 ./nr-ue -c ../config/custom-ue.yaml
@@ -1201,7 +1399,7 @@ UERANSIM v3.2.7
 [2025-08-13 15:56:13.361] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 192.168.100.2] is up.
 ```
 
-Luego de que esten correctamente inicializados el `gnb` y el `ue` se puede hacer ping a google con:
+Luego de que estén correctamente inicializados el `gnb` y el `ue` se puede hacer ping a google con:
 
 ```bash
 ./nr-binder <uesimtun_interface_IP> ping google.com
@@ -1215,7 +1413,7 @@ ip a
 
 #### Cambio en la configuracion del *service* `nrf`
 
-Para que el UDM pueda acceder el puerto del *service* del NRF, es necesario cambiar su tipo a `NodePort`. Esto se puede hacer con las siguientes instrucciones:
+Para que el UDM pueda acceder el puerto del *service* del NRF, es necesario cambiar su tipo a `NodePort`. Esto se puede realizar con las siguientes instrucciones:
 
 ```bash
 kubebctl edit svc nrf -n aether-5gc
@@ -1272,7 +1470,7 @@ status:
 Se debe cambiar el campo `spec.type` a `NodePort`.
 
 > [!NOTE] Nota Importante
-> Este cambio se realiza "en caliente" luego de que esta desplegado todo el cluster. Si por algún motivo se reinstala Aether este cambio se sobreescribirá por su configuración original y será necesario realizarlo nuevamente.
+> Este cambio se realiza "en caliente" luego de que esta desplegado todo el clúster. Si por algún motivo se reinstala Aether este cambio se sobreescribirá por su configuración original y será necesario realizarlo nuevamente.
 
 Después de realizar el cambio de configuración en el *service* del NRF, al ejecutar el comando `kubectl get svc -n aether-5gc`, se podrá observar que el servicio del NRF tiene un puerto mapeado.
 
@@ -1420,7 +1618,7 @@ Salida esperada:
 2025-08-13T19:57:51.609Z INFO logger/logger.go:91 | 400 |   192.168.12.11 | GET     | /nnrf-nfm/v1/nf-instances |  {"component": "NRF", "category": "GIN"}
 ```
 
-En esta línea se puede ver la llegada de la solititud de registro del UDM de Open5GS:
+En esta línea se puede ver la llegada de la solicitud de registro del UDM de Open5GS:
 
 ```logs-NRF
 08/13 19:57:51.608: [sbi] INFO: [cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d] NF registered [Heartbeat:60s] (../lib/sbi/nf-sm.c:295)
@@ -1432,7 +1630,7 @@ Se activa el procedimiento de registro:
 2025-08-13T19:57:51.601Z DEBUG producer/nf_management.go:461 [NRF] In NFRegisterProcedure {"component": "NRF", "category": "MGMT"}
 ```
 
-Se obtienen las configuraciones de PLMN del `webconsole` ya que no fueron proporcionadas por la nueva NF (UDM)
+Se obtienen las configuraciones de PLMN (Public Land Mobile Network) del `webconsole` ya que no fueron proporcionadas por la nueva NF (UDM)
 
 ```logs-NRF
 2025-08-13T19:57:51.601Z WARN context/management_data.go:73 PLMN config not provided by NF, using supported PLMNs from webconsole {"component": "NRF", "category": "MGMT"}
@@ -1477,6 +1675,10 @@ El proceso anterior se describe también en la siguiente figura:
 
 Figura 6. Registro del UDM (Open5GS) en el NRF (Aether)
 
-## Evaluación final y recomendaciones
+### Evaluación final de la Prueba 2 y recomendaciones
 
 Con las modificaciones realizadas en el código fuente de Aether SD-Core se logró registrar un UDM de terceros (en este caso, el UDM de Open5GS) en el NRF de Aether. Este procedimiento fue validado mediante evidencias en los registros tanto del UDM como del NRF. Sin embargo, tras el registro se presentaron fallos de interoperabilidad entre los componentes. Resolver estos problemas requiere continuar modificando el código del NRF y de otros servicios relacionados para alcanzar una funcionalidad completa del UDM de terceros. No obstante, este esfuerzo no resulta eficiente en el caso del UDM de Open5GS, ya que no será el utilizado en un entorno de producción, lo que podría generar nuevas incompatibilidades con el UDM de ETECSA, que es el componente objetivo con el cual se busca la interoperabilidad real.
+
+
+
+
