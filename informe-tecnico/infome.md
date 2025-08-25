@@ -240,7 +240,7 @@ Ejecutar el script para crear los builds de cada componente:
 
 ### Obtener builds
 
-e debe crear aquí el script `get_builds.sh`:
+Se debe crear aquí el script `get_builds.sh`:
 
 ```bash
 touch get_builds.sh
@@ -343,11 +343,11 @@ En cada NF de aether se agregaron las siguientes líneas en el archivo de los mo
 
 Luego se realizaron *builds* de estas NF para probarlas en el entorno de desarollo.
 
-Por último se actualizó el NRF para que completara el campo NfServiceList en caso de que no llegara ese campo por parte de la NF. Los cambios se pueden ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
+Por último se actualizó el NRF para que completara el campo NfServiceList o NfServices en caso de que no llegara ese campo por parte de la NF. Los cambios se pueden ver aquí: [Enlace a commit](https://github.com/networkgcorefullcode/nrf/commit/aaaf24b2cec666c1d2bd6cb2b2ad068a4193848f)
 
 ### WebUI Update
 
-El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creó una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de Docker para habilitar esta funcionalidad. Se puede a esta WebUI utilizando  la dirección y puerto que se le asigne para este servicio.
+El WebUI tiene la posibilidad de mostrar y manejar información a través de una página web, haciendo uso de inteligencia artificial se creó una página web para agregar esta posibilidad, también se hicieron modificaciones en como se construye la imagen de Docker para habilitar esta funcionalidad. Se puede acceder a esta WebUI utilizando  la dirección y puerto que se le asigne para este servicio.
 
 ### AMF, SMF, NSSF update to release 2.0.0
 
