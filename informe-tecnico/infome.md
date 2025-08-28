@@ -41,18 +41,24 @@
       - [Obtener y operar charts](#obtener-y-operar-charts)
       - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
-  - [Pruebas de simulación y trazas de logs de registro](#pruebas-de-simulación-y-trazas-de-logs-de-registro)
+  - [Casos de Prueba](#casos-de-prueba)
     - [Configuraciones previas](#configuraciones-previas)
       - [Despliegue de Aether  y UERANSIM](#despliegue-de-aether--y-ueransim)
-    - [Prueba 1. Registro de NFs nativas de Aether en el NRF de Aether](#prueba-1-registro-de-nfs-nativas-de-aether-en-el-nrf-de-aether)
-    - [Evaluación final de la Prueba 1](#evaluación-final-de-la-prueba-1)
-    - [Prueba 2. Registro del UDM de Open5GS en el NRF de Aether](#prueba-2-registro-del-udm-de-open5gs-en-el-nrf-de-aether)
-      - [Simulación](#simulación)
-      - [Cambio en la configuracion del *service* `nrf`](#cambio-en-la-configuracion-del-service-nrf)
-      - [Instalación de Docker y Docker Compose](#instalación-de-docker-y-docker-compose)
-      - [Despliegue del UDM de Open5GS](#despliegue-del-udm-de-open5gs)
-      - [Evidencia de registro en los logs](#evidencia-de-registro-en-los-logs)
-    - [Evaluación final de la Prueba 2 y recomendaciones](#evaluación-final-de-la-prueba-2-y-recomendaciones)
+    - [Prueba 1. Prueba de Integración y Registro de NFs nativas de Aether](#prueba-1-prueba-de-integración-y-registro-de-nfs-nativas-de-aether)
+      - [**Procedimiento:**](#procedimiento)
+      - [**Resultados Obtenidos:**](#resultados-obtenidos)
+    - [Análisis y Veredicto de la Prueba 1](#análisis-y-veredicto-de-la-prueba-1)
+    - [Prueba 2. Simulación y comprobacion de funcionamiento](#prueba-2-simulación-y-comprobacion-de-funcionamiento)
+      - [**Procedimiento:**](#procedimiento-1)
+    - [Análisis y Veredicto de la Prueba 3](#análisis-y-veredicto-de-la-prueba-3)
+    - [Prueba 3. Prueba de Integración y Registro de UDM Externo](#prueba-3-prueba-de-integración-y-registro-de-udm-externo)
+      - [Procedimiento](#procedimiento-2)
+        - [**Cambio en la configuracion del *service* `nrf`**](#cambio-en-la-configuracion-del-service-nrf)
+        - [Instalación de Docker y Docker Compose](#instalación-de-docker-y-docker-compose)
+        - [Despliegue del UDM de Open5GS](#despliegue-del-udm-de-open5gs)
+      - [Resultados Obtenidos](#resultados-obtenidos-1)
+    - [Análisis y Veredicto de la Prueba 3](#análisis-y-veredicto-de-la-prueba-3-1)
+  - [Conclusiones del informe](#conclusiones-del-informe)
 
 ## Introducción
 
@@ -134,6 +140,12 @@ GitHub repository for the ONF: [https://github.com/opennetworkinglab](https://gi
 Las imágenes de Docker se guardan en Docker Hub, se pueden encontrar buscando 'network5gcore' en la plataforma.
 
 
+Para llevar a cabo las tareas de modificación de código, compilación de binarios y construcción de imágenes, se configuró un entorno de desarrollo centralizado en una única máquina virtual. Esta arquitectura, como se muestra en la Figura 1, garantiza un espacio de trabajo aislado y reproducible.
+
+![alt text](imgs/diagram-dev-env.png)
+
+Figura X: Arquitectura del Entorno de Desarrollo y Compilación.
+
 
 ### Pasos iniciales
 
@@ -206,7 +218,7 @@ Después de que termine la ejecución del script, se obtendrá la estructura de 
 
 ![Estructura de carpetas después de clonar los repositorios](imgs/{3A4EB7A6-8BC8-4E09-89EB-5599B0EB2BB5}.png)
 
-Figura 1. Carpetas de cada repositorio del proyecto.
+Figura X. Carpetas de cada repositorio del proyecto.
 
 Actualmente, la clonación de los repositorios incluye el repositorio `utilFiles`, donde se definen varios de los archivos mencionados en esta sección del informe. Para poder utilizar estos archivos, se debe copiar su contenido en la raíz donde se encuentran todos los demás repositorios. De esta manera, podrán utilizarse sin inconvenientes.
 
@@ -273,7 +285,7 @@ Este script copiará todos los builds de Go en una carpeta llamada `bin`, como s
 
 ![Binario de cada uno de los componentes](imgs/{BBEA4130-7110-4E58-8C59-AC1895312AAC}.png)
 
-Figura 2. Carpeta `bin` con las carpetas correspondientes a cada binario compilado con Go.
+Figura X. Carpeta `bin` con las carpetas correspondientes a cada binario compilado con Go.
 
 
 ### Ejecutar componentes individualmente
@@ -331,6 +343,9 @@ Para actualizar el NfProfile se utilizó el modelo generado por openapi generato
 Se pueden visitar los siguientes commits donde se hicieron todos los cambios necesarios en el modelo de openapi
 ![alt text](imgs/{B4EE9F0D-3841-465E-947F-8172C116CD38}.png)
 
+Figura X. <\Insertar nombre de figura>
+
+
 2. Se creó un nuevo release de openapi con el modelo actualizado.
 
 Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se realizó un push con ese tag.
@@ -340,6 +355,8 @@ Este paso es sencillo simplemente se creó un nuevo tag en la rama main y se rea
 En cada NF de aether se agregaron las siguientes líneas en el archivo de los modulos de go:
 
 ![alt text](imgs/image.png)
+
+Figura X. <\Insertar nombre de figura>
 
 Luego se realizaron *builds* de estas NF para probarlas en el entorno de desarollo.
 
@@ -737,7 +754,7 @@ Se debe observar una salida similar a la siguiente:
 
 ![alt text](imgs/{70E4BAB7-F16D-481C-AF22-A3AF4EC88405}.png)
 
-Figura ##. Pods de Kubernetes en estado **Running**
+Figura X. Pods de Kubernetes en estado **Running**
 
 ### Trabajando con Helm
 
@@ -1098,9 +1115,22 @@ $ kubectl get po -n bess-upf
 ```
 
 
-## Pruebas de simulación y trazas de logs de registro
 
-Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether, a continuación se detalla cómo se llevó a cabo este proceso.
+## Casos de Prueba
+
+Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether.
+
+El proceso de validación se realizó en un entorno de pruebas distribuido, diseñado para simular de manera realista la interacción entre los distintos componentes del ecosistema 5G. La topología de este entorno, que incluye el Core 5G modificado, el simulador de red de acceso y el componente externo, se ilustra en la Figura X.
+
+![alt text](imgs/diagram-test-env.png)
+
+Figura X: Topología del Entorno de Pruebas de Integración.
+
+Además se incluye un diagrama correspondiente a la comunicación entre los principales componentes del despliegue de Aether y UERANSIM, en la Figura Y.
+
+![alt text](imgs/diagram-aether-k8s.png)
+
+Figura Y. Diagrama de comunicación entre de componentes de Aether y UERANSIM
 
 ### Configuraciones previas
 
@@ -1161,7 +1191,7 @@ node2
 
 #### Despliegue de Aether  y UERANSIM
 
-Para desplegar aether primeramente es necesario instalar Kubernetes con:
+Para desplegar Aether primeramente es necesario instalar Kubernetes con:
 
 ```bash
 make aether-k8s-install
@@ -1179,15 +1209,32 @@ Para desplegar UERANSIM se corre el comando:
 make aether-ueransim-install
 ```
 
-### Prueba 1. Registro de NFs nativas de Aether en el NRF de Aether
+
+
+### Prueba 1. Prueba de Integración y Registro de NFs nativas de Aether
+
+**Objetivo:** Verificar que el NRF modificado puede registrar NFs nativas de Aether.
+
+**Métricas Clave de Éxito (KPIs):** Definir cuantitativamente el éxito. 
+Ejemplos:
+- Tasa de éxito de registro: 100%.
+- Tiempo promedio de registro < 500 ms.
+- Consumo de CPU del pod NRF 
+
+
+**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
+
+
+#### **Procedimiento:**
 
 Una vez desplegado correctamente Aether SD-Core se pueden revisar los logs del NRF para ver los registros de las funciones de red el propio núcleo 5G con el siguiente comando:
 ```bash
 kubectl logs -n aether-5gc <NRF_pod_name>
 ```
 
-Resultado del comando anterior:
+#### **Resultados Obtenidos:**
 
+Resultado del comando anterior:
 ```
 2025-08-24T16:31:03.449Z	INFO	nrf/nrf.go:28	nrf	{"component": "NRF", "category": "Init"}
 2025-08-24T16:31:03.452Z	INFO	service/init.go:107	NRF Log level is set to [info] level	{"component": "NRF", "category": "Init"}
@@ -1319,14 +1366,26 @@ En los logs anteriores se puede ver la creación del `NF Profile` para cada func
 ```
 
 
-### Evaluación final de la Prueba 1
+### Análisis y Veredicto de la Prueba 1
 
-En la prueba anterior se demostró que el NRF de Aether SD-Core, con los cambios hechos en su código fuente, sigue siento totalmente funcional y capaz de registrar las funciones de red nativas de su Core 5G.
+La prueba anterior resultó exitosa, se demostró que el NRF de Aether SD-Core, con los cambios hechos en su código fuente, sigue siento totalmente funcional y capaz de registrar las funciones de red nativas de su Core 5G.
 
 
-### Prueba 2. Registro del UDM de Open5GS en el NRF de Aether
+### Prueba 2. Simulación y comprobacion de funcionamiento
 
-#### Simulación
+**Objetivo:** Verificar que el NRF mantiene el núcleo 5G funcional.
+https://github.com/networkgcorefullcode/docs_dev
+**Métricas Clave de Éxito (KPIs):** Definir cuantitativamente el éxito. 
+Ejemplos:
+- Tasa de éxito de registro: 100%.
+- Tiempo promedio de registro < 500 ms.
+- Consumo de CPU del pod NRF 
+
+
+**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
+
+
+#### **Procedimiento:**
 
 Para correr la simulación con UERANSIM se debe entrar por SSH (Secure Shell) a la VM del simulador, y en la carpeta `ueransim/build` ejecutar los siguientes comandos.
 
@@ -1411,15 +1470,33 @@ Luego de que estén correctamente inicializados el `gnb` y el `ue` se puede hace
 ip a
 ```
 
-#### Cambio en la configuracion del *service* `nrf`
+### Análisis y Veredicto de la Prueba 3
+
+
+### Prueba 3. Prueba de Integración y Registro de UDM Externo
+
+**Objetivo:** Verificar que el NRF modificado puede registrar correctamente un UDM de Open5GS y gestionar su ciclo de vida básico").
+
+**Métricas Clave de Éxito (KPIs):** 
+Ejemplo:
+- Tasa de éxito de registro: 100%.
+- Tiempo promedio de registro < 500 ms.
+- Consumo de CPU del pod NRF no supera el 25% durante el registro.
+
+**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
+
+
+#### Procedimiento 
+
+##### **Cambio en la configuracion del *service* `nrf`**
 
 Para que el UDM pueda acceder el puerto del *service* del NRF, es necesario cambiar su tipo a `NodePort`. Esto se puede realizar con las siguientes instrucciones:
 
 ```bash
 kubebctl edit svc nrf -n aether-5gc
 ```
-
 - Comando para editar el service del `nrf` en el *namespace* `aether-5gc`
+
 
 Salida esperada:
 
@@ -1474,9 +1551,11 @@ Se debe cambiar el campo `spec.type` a `NodePort`.
 
 Después de realizar el cambio de configuración en el *service* del NRF, al ejecutar el comando `kubectl get svc -n aether-5gc`, se podrá observar que el servicio del NRF tiene un puerto mapeado.
 
-#### Instalación de Docker y Docker Compose
+##### Instalación de Docker y Docker Compose
 
-Docker:
+El UDM de Open5GS será desplegado en Docker, con un despliegue utilizando Docker-Compose. Por lo tando es necesario instalar esta tecnología siguiendo los siguientes pasos: 
+
+**Docker:**
 
 ```bash
 sudo apt update
@@ -1491,13 +1570,14 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-Docker-Compose:
+**Docker-Compose:**
 
 ```bash
 sudo wget -c https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-`uname -s`-`uname -m` -O /usr/local/bin/docker-compose; sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-#### Despliegue del UDM de Open5GS
+
+##### Despliegue del UDM de Open5GS
 
 Clonar el siguiente repositorio para obtener todos los archivos necesarios:
 
@@ -1555,7 +1635,7 @@ Luego se puede desplegar el UDM de Open5GS en Docker, utilizando el siguiente co
 docker-compose -f udm-deploy.yaml up -d
 ```
 
-#### Evidencia de registro en los logs
+#### Resultados Obtenidos
 
 Luego de completar el despliegue del UDM se pueden ver los logs del contenedor con el comando:
 
@@ -1673,12 +1753,27 @@ El UDM no sabe qué hacer con este error. Esperaba una lista de servicios y en s
 El proceso anterior se describe también en la siguiente figura:
 ![Registro del UDM (Open5GS) en el NRF (Aether)](imgs/registo-del-UDM(Open5GS)-en-NRF(Aether).png)
 
-Figura 6. Registro del UDM (Open5GS) en el NRF (Aether)
+Figura X. Registro del UDM (Open5GS) en el NRF (Aether)
 
-### Evaluación final de la Prueba 2 y recomendaciones
 
-Con las modificaciones realizadas en el código fuente de Aether SD-Core se logró registrar un UDM de terceros (en este caso, el UDM de Open5GS) en el NRF de Aether. Este procedimiento fue validado mediante evidencias en los registros tanto del UDM como del NRF. Sin embargo, tras el registro se presentaron fallos de interoperabilidad entre los componentes. Resolver estos problemas requiere continuar modificando el código del NRF y de otros servicios relacionados para alcanzar una funcionalidad completa del UDM de terceros. No obstante, este esfuerzo no resulta eficiente en el caso del UDM de Open5GS, ya que no será el utilizado en un entorno de producción, lo que podría generar nuevas incompatibilidades con el UDM de ETECSA, que es el componente objetivo con el cual se busca la interoperabilidad real.
+### Análisis y Veredicto de la Prueba 3
 
+
+
+## Conclusiones del informe
+
+
+El trabajo de integración y prueba documentado en este informe ha arrojado las siguientes conclusiones clave que deben guiar las próximas fases del proyecto:
+
+1. **Viabilidad Técnica Demostrada:** Se ha demostrado con éxito que el núcleo Aether SD-Core es lo suficientemente flexible para ser modificado e interactuar con funciones de red (NF) de terceros. La capacidad de registrar un UDM externo en el NRF de Aether fue validada técnicamente, cumpliendo así el objetivo principal de esta fase de investigación y estableciendo una base sólida para futuras integraciones.
+
+2. **La Interoperabilidad es Específica de cada Implementación:** El hallazgo más crítico es que la interoperabilidad real va más allá de un registro exitoso. Los fallos detectados en las fases subsecuentes (como el descubrimiento de servicios) son inherentes a la interacción entre Aether y la implementación específica del UDM utilizado como banco de pruebas. Estos desafíos no son necesariamente representativos de los que se encontrarán con el UDM del entorno de producción final.
+
+3. **Riesgo de Inversión Ineficiente de Recursos:** Se concluye que continuar un desarrollo extensivo para adaptar Aether a las particularidades de un UDM de prueba representa un riesgo estratégico. Dicho esfuerzo podría resultar en una "sobreingeniería" para un escenario no productivo, consumiendo tiempo y recursos valiosos que podrían no ser aplicables a la solución final.
+
+
+**Recomendación Principal:**
+Se recomienda detener el desarrollo incremental orientado a lograr la compatibilidad total con el UDM de prueba. El proyecto debe priorizar la obtención de acceso al UDM objetivo que se utilizará en el entorno de producción. Los futuros ciclos de desarrollo deben centrarse exclusivamente en los desafíos de integración con este componente final para garantizar una solución robusta, compatible y alineada con los objetivos de negocio.
 
 
 
