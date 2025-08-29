@@ -50,14 +50,14 @@
     - [Análisis y Veredicto de la Prueba 1](#análisis-y-veredicto-de-la-prueba-1)
     - [Prueba 2. Simulación y comprobacion de funcionamiento](#prueba-2-simulación-y-comprobacion-de-funcionamiento)
       - [**Procedimiento:**](#procedimiento-1)
-    - [Análisis y Veredicto de la Prueba 3](#análisis-y-veredicto-de-la-prueba-3)
+    - [Análisis y Veredicto de la Prueba 2](#análisis-y-veredicto-de-la-prueba-2)
     - [Prueba 3. Prueba de Integración y Registro de UDM Externo](#prueba-3-prueba-de-integración-y-registro-de-udm-externo)
       - [Procedimiento](#procedimiento-2)
         - [**Cambio en la configuracion del *service* `nrf`**](#cambio-en-la-configuracion-del-service-nrf)
         - [Instalación de Docker y Docker Compose](#instalación-de-docker-y-docker-compose)
         - [Despliegue del UDM de Open5GS](#despliegue-del-udm-de-open5gs)
       - [Resultados Obtenidos](#resultados-obtenidos-1)
-    - [Análisis y Veredicto de la Prueba 3](#análisis-y-veredicto-de-la-prueba-3-1)
+    - [Análisis y Veredicto de la Prueba 3](#análisis-y-veredicto-de-la-prueba-3)
   - [Conclusiones del informe](#conclusiones-del-informe)
 
 ## Introducción
@@ -441,6 +441,11 @@ En las siguientes secciones se abordarán configuraciones relacionadas a un ento
 
 ## Aether OnRamp
 
+Se realizaron configuraciones en el repositorio [Aether-OnRamp]() para adaptar el despliegue del núcleo 5G a los nuevos cambios. 
+
+> [!NOTE] Nota Importante
+> Todas las configuraciones de Aether OnRamp hechas en este informe están en la rama `feature/update-aether`.
+
 ### Imágenes de Docker
 
 Para desplegar los componentes de Aether actualizados, se requiere disponer de las imágenes de cada NF. Para ello, se realizaron los siguientes pasos:
@@ -525,7 +530,7 @@ omecproject/5gc-<nombre del componente en minúscula>:<valor definido en el arch
 
 - Por ahora los despliegues se han hecho manteniendo el plano de usuario original de Aether, como se puede observar las imágenes actualizadas de esa sección están definidas pero comentadas.
 
-2. Se añadieron configuraciones para varias NFs como por ejemplo: AUSF (Authentication Server Function), UDM (Unified Data Management), UDR (Unified Data Repository), NSSF (Network Slice Selection Function) y  PCF (Policy Control Function), ya que sin la definición de su configuración daban problemas al inicializarse los contenedores, y fueron modificadas otras como el WebUI, AMF (Access and Mobility Function), NRF y SMF (Session Management Function)  para poder desactivar el cifrado TLS (Transport Layer Security) y tener toda la comunicación en HTTP (Hypertext Transfer Protocol). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa se puede acceder al archivo [aquí](https://github.com/networkgcorefullcode/aether-onramp/blob/main/deps/5gc/roles/core/templates/sdcore-5g-values.yaml)
+2. Se añadieron configuraciones para varias NFs como por ejemplo: AUSF (Authentication Server Function), UDM (Unified Data Management), UDR (Unified Data Repository), NSSF (Network Slice Selection Function) y  PCF (Policy Control Function), ya que sin la definición de su configuración daban problemas al inicializarse los contenedores, y fueron modificadas otras como el WebUI, AMF (Access and Mobility Function), NRF y SMF (Session Management Function)  para poder desactivar el cifrado TLS (Transport Layer Security) y tener toda la comunicación en HTTP (Hypertext Transfer Protocol). En este documento no se detallará cada configuración debido a que sería demasiado extenso. Para una inspección completa se puede acceder al archivo [aquí](https://github.com/networkgcorefullcode/aether-onramp/blob/feature/update-aether/deps/5gc/roles/core/templates/sdcore-5g-values.yaml)
 
 3. Debido a que se están usando componentes de Aether más actualizados (no solo por este proyecto sino también por desarrolladores oficiales de Aether) existen procesos nuevos. Uno de ellos es que ahora las NFs hacen un *polling* periódico al **WebUI** a través del puerto `5001`. Es por eso que cada NF debe tener esta configuración:
 
@@ -1134,7 +1139,22 @@ Figura Y. Diagrama de comunicación entre de componentes de Aether y UERANSIM
 
 ### Configuraciones previas
 
-Primeramente se debe desplegar el Core 5G configurando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde serán desplegados Aether y el simulador UERANSIM.
+Primeramente se debe configurar el despliegue de Kubernetes editando el archivo `host.yml` ubicado en `/deps/k8s/inventory/storage/host.yml` partiendo desde la raíz del repositorio de Aether OnRamp. En este archivo se debe configurar la IP del server de Aether para instalar Kubernetes.
+
+`host.yml`
+```
+---
+rke2_cluster:
+  children:
+    rke2_servers:
+      hosts:
+        192.168.12.11:
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: /home/abelct/.ssh/id_rsa
+
+```
+
+Luego se debe configurar el despliegue del Core 5G eaditando el archivo `vars/main.yaml` y el archivo `host.ini` con las IPs de los servidores donde serán desplegados Aether y el simulador UERANSIM.
 
 `vars/main.yml`
 
@@ -1395,28 +1415,12 @@ Para simular la `gnb` (Estación Base 5G):
 ./nr-gnb -c ../config/custom-gnb.yaml
 ```
 
-Resultado esperado del comando anterior:
+El resultado esperado del comando anterior se puede observar en la Figura K:
 
-```bash
-UERANSIM v3.2.7
-[2025-08-13 15:55:46.882] [sctp] [info] Trying to establish SCTP connection... (192.168.12.11:38412)
-[2025-08-13 15:55:46.921] [sctp] [info] SCTP connection established (192.168.12.11:38412)
-[2025-08-13 15:55:46.921] [sctp] [debug] SCTP association setup ascId[3]
-[2025-08-13 15:55:46.921] [ngap] [debug] Sending NG Setup Request
-[2025-08-13 15:55:46.926] [ngap] [debug] NG Setup Response received
-[2025-08-13 15:55:46.926] [ngap] [info] NG Setup procedure is successful
-[2025-08-13 15:56:03.299] [rrc] [debug] UE[1] new signal detected
-[2025-08-13 15:56:03.301] [rrc] [info] RRC Setup for UE[1]
-[2025-08-13 15:56:03.306] [ngap] [debug] Initial NAS message received from UE[1]
-[2025-08-13 15:56:03.961] [ngap] [debug] Initial Context Setup Request received
-[2025-08-13 15:56:04.955] [ngap] [info] PDU session resource(s) setup for UE[1] count[1]
-[2025-08-13 15:56:08.164] [rls] [debug] UE[1] signal lost
-[2025-08-13 15:56:12.658] [rrc] [debug] UE[2] new signal detected
-[2025-08-13 15:56:12.658] [rrc] [info] RRC Setup for UE[2]
-[2025-08-13 15:56:12.658] [ngap] [debug] Initial NAS message received from UE[2]
-[2025-08-13 15:56:12.957] [ngap] [debug] Initial Context Setup Request received
-[2025-08-13 15:56:13.355] [ngap] [info] PDU session resource(s) setup for UE[2] count[1]
-```
+![Inicialización del gNB)](imgs/gnb-sim.png)
+
+Figura K. Inicialización del gNB
+
 
 Para simular el UE (User Equipment):
 
@@ -1424,39 +1428,12 @@ Para simular el UE (User Equipment):
 ./nr-ue -c ../config/custom-ue.yaml
 ```
 
-Resultado esperado del comando anterior:
+El resultado esperado del comando anterior se puede observar en la Figura T.
 
-```bash
-UERANSIM v3.2.7
-[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
-[2025-08-13 15:56:12.658] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
-[2025-08-13 15:56:12.658] [nas] [info] Selected plmn[208/93]
-[2025-08-13 15:56:12.658] [rrc] [info] Selected cell plmn[208/93] tac[1] category[SUITABLE]
-[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
-[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
-[2025-08-13 15:56:12.658] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
-[2025-08-13 15:56:12.658] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2025-08-13 15:56:12.658] [nas] [debug] Sending Initial Registration
-[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
-[2025-08-13 15:56:12.658] [rrc] [debug] Sending RRC Setup Request
-[2025-08-13 15:56:12.658] [rrc] [info] RRC connection established
-[2025-08-13 15:56:12.658] [rrc] [info] UE switches to state [RRC-CONNECTED]
-[2025-08-13 15:56:12.658] [nas] [info] UE switches to state [CM-CONNECTED]
-[2025-08-13 15:56:12.698] [nas] [debug] Authentication Request received
-[2025-08-13 15:56:12.698] [nas] [debug] Received SQN [000000000022]
-[2025-08-13 15:56:12.698] [nas] [debug] SQN-MS [000000000000]
-[2025-08-13 15:56:12.770] [nas] [debug] Security Mode Command received
-[2025-08-13 15:56:12.770] [nas] [debug] Selected integrity[3] ciphering[3]
-[2025-08-13 15:56:12.958] [nas] [debug] Registration accept received
-[2025-08-13 15:56:12.958] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
-[2025-08-13 15:56:12.958] [nas] [debug] Sending Registration Complete
-[2025-08-13 15:56:12.958] [nas] [info] Initial Registration is successful
-[2025-08-13 15:56:12.958] [nas] [debug] Sending PDU Session Establishment Request
-[2025-08-13 15:56:12.958] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2025-08-13 15:56:13.355] [nas] [debug] PDU Session Establishment Accept received
-[2025-08-13 15:56:13.355] [nas] [info] PDU Session establishment is successful PSI[1]
-[2025-08-13 15:56:13.361] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 192.168.100.2] is up.
-```
+![Inicialización del UE)](imgs/ue-sim.png)
+
+Figura T. Inicialización del UE
+
 
 Luego de que estén correctamente inicializados el `gnb` y el `ue` se puede hacer ping a google con:
 
@@ -1464,13 +1441,16 @@ Luego de que estén correctamente inicializados el `gnb` y el `ue` se puede hace
 ./nr-binder <uesimtun_interface_IP> ping google.com
 ```
 
-`uesimtun_interface_IP` es la IP de la interfaz `uesimtun` que se puede obtener con el comando:
+`uesimtun_interface_IP` es la IP de la interfaz `uesimtun` que se puede obtener con el comando `ip a` como se muestra en la Figura M.
 
-```bash
-ip a
-```
+![Ping a Google)](imgs/ping-sim.png)
 
-### Análisis y Veredicto de la Prueba 3
+Figura M. Ping a Google
+
+
+Como se puede observar en las imágenes tanto el ping, como la inicialización del UE y el gNb fueron exitosas.
+
+### Análisis y Veredicto de la Prueba 2
 
 
 ### Prueba 3. Prueba de Integración y Registro de UDM Externo
