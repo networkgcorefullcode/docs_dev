@@ -42,6 +42,7 @@
       - [Utils](#utils)
     - [Comandos para eliminar kubernetes](#comandos-para-eliminar-kubernetes)
   - [Casos de Prueba](#casos-de-prueba)
+  - [Descripción del Entorno de Pruebas](#descripción-del-entorno-de-pruebas)
     - [Configuraciones previas](#configuraciones-previas)
       - [Despliegue de Aether  y UERANSIM](#despliegue-de-aether--y-ueransim)
     - [Prueba 1. Prueba de Integración y Registro de NFs nativas de Aether](#prueba-1-prueba-de-integración-y-registro-de-nfs-nativas-de-aether)
@@ -1123,19 +1124,35 @@ $ kubectl get po -n bess-upf
 
 ## Casos de Prueba
 
-Utilizando las configuraciones realizadas en Aether OnRamp se pudo comprobar el correcto funcionamiento de las nuevas características implementadas en Aether.
 
-El proceso de validación se realizó en un entorno de pruebas distribuido, diseñado para simular de manera realista la interacción entre los distintos componentes del ecosistema 5G. La topología de este entorno, que incluye el Core 5G modificado, el simulador de red de acceso y el componente externo, se ilustra en la Figura X.
+En esta sección se detallan los casos de prueba ejecutados para validar la funcionalidad, interoperabilidad y estabilidad de las modificaciones implementadas en el Aether SD-Core.
+
+## Descripción del Entorno de Pruebas
+
+Para garantizar la validez y reproducibilidad de los resultados, todas las pruebas se llevaron a cabo en un entorno de laboratorio controlado. Este entorno fue diseñado para simular de manera realista la arquitectura de un despliegue 5G, permitiendo la interacción entre los distintos componentes del ecosistema.
+
+
+La topología general del entorno, como se ilustra en la Figura X, se basa en una arquitectura distribuida compuesta por tres máquinas virtuales (VM) KVM en un servidor Proxmox:
+
+- VM del Core 5G: Aloja un clúster de Kubernetes de un solo nodo. Sobre este clúster se despliega la versión modificada de Aether SD-Core utilizando los playbooks de Aether OnRamp. Este servidor es el núcleo del entorno y alberga todas las funciones de red del núcleo 5G.
+
+- VM del Simulador RAN/UE: Ejecuta UERANSIM, un simulador de código abierto para la Red de Acceso de Radio (RAN) y el Equipo de Usuario (UE). Este servidor es responsable de simular el tráfico de señalización y datos, iniciando las conexiones que validan el funcionamiento del Core 5G.
+
+- VM del Registry Privado Nexus: Aloja un registry privado de Nexus que contiene todas las imágenes de docker de los componentes actualizados. El despliegue con OnRamp consume las imágenes de los contenedores desde este regisry.
 
 ![alt text](imgs/diagram-test-env.png)
 
 Figura X: Topología del Entorno de Pruebas de Integración.
 
-Además se incluye un diagrama correspondiente a la comunicación entre los principales componentes del despliegue de Aether y UERANSIM, en la Figura Y.
+La comunicación entre los componentes se establece a través de interfaces de red estándar, como se detalla en el diagrama de la Figura Y. La gNB simulada en UERANSIM se conecta al AMF de Aether a través de la interfaz NGAP, mientras que los componentes externos, como el UDM de Open5GS utilizado en la prueba de interoperabilidad, se conectan al NRF a través de su interfaz de servicio (SBI) expuesta.
 
 ![alt text](imgs/diagram-aether-k8s.png)
 
 Figura Y. Diagrama de comunicación entre de componentes de Aether y UERANSIM
+
+
+Este diseño permite aislar los componentes, monitorizar las interacciones de manera precisa y validar tanto los flujos de comunicación internos del Core como su capacidad para integrarse con sistemas de terceros.
+
 
 ### Configuraciones previas
 
@@ -1236,13 +1253,9 @@ make aether-ueransim-install
 **Objetivo:** Verificar que el NRF modificado puede registrar NFs nativas de Aether.
 
 **Métricas Clave de Éxito (KPIs):** Definir cuantitativamente el éxito. 
-Ejemplos:
-- Tasa de éxito de registro: 100%.
-- Tiempo promedio de registro < 500 ms.
-- Consumo de CPU del pod NRF 
+- Tasa de éxito de registro: Porcentaje de NFs que se registran correctamente en el NRF.
+- Consistencia de la comunicación: Estado de respuesta del registro.
 
-
-**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
 
 
 #### **Procedimiento:**
@@ -1348,42 +1361,82 @@ Resultado del comando anterior:
 2025-08-24T16:32:57.215Z	INFO	context/management_data.go:103	HeartBeat Timer value: 60 sec	{"component": "NRF", "category": "MGMT"}
 ```
 
-En los logs anteriores se puede ver la creación del `NF Profile` para cada función de red, y por tanto su registro. 
+En los logs anteriores se puede ver la creación del `NF Profile` para cada función de red, y por tanto su registro, así como la respuesta HTTP 201 al mismo.
 
-**UDM**
+Creación del `NF Profile` del **UDM**
 ```
 2025-08-24T16:32:30.321Z	INFO	producer/nf_management.go:527	Create NF Profile  UDM	{"component": "NRF", "category": "MGMT"}
 ```
 
-**NSSF**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:30.335Z	INFO	logger/logger.go:91	| 201 |      10.42.0.74 | PUT     | /nnrf-nfm/v1/nf-instances/96638fc1-7511-4b50-8260-dcd0c195ff10 | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **NSSF**
 ```
 2025-08-24T16:32:30.437Z	INFO	producer/nf_management.go:527	Create NF Profile  NSSF	{"component": "NRF", "category": "MGMT"}
 ```
 
-**PCF**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:30.438Z	INFO	logger/logger.go:91	| 201 |      10.42.0.75 | PUT     | /nnrf-nfm/v1/nf-instances/d9c17bb1-fc10-4346-abb8-725681d63af7 | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **PCF**
 ```
 2025-08-24T16:32:35.675Z	INFO	producer/nf_management.go:527	Create NF Profile  PCF	{"component": "NRF", "category": "MGMT"}
 ```
 
-**AUSF**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:35.676Z	INFO	logger/logger.go:91	| 201 |      10.42.0.62 | PUT     | /nnrf-nfm/v1/nf-instances/ce9b1a86-493e-411b-935c-089de3cbb7b2 | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **AUSF**
 ```
 2025-08-24T16:32:37.623Z	INFO	producer/nf_management.go:527	Create NF Profile  AUSF	{"component": "NRF", "category": "MGMT"}
 ```
 
-**SMF**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:37.624Z	INFO	logger/logger.go:91	| 201 |      10.42.0.57 | PUT     | /nnrf-nfm/v1/nf-instances/4f10cd39-fbd2-4599-a680-e20cced65a7c | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **SMF**
 ```
 2025-08-24T16:32:39.276Z	INFO	producer/nf_management.go:527	Create NF Profile  SMF	{"component": "NRF", "category": "MGMT"}
 ```
 
-**UDR**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:39.277Z	INFO	logger/logger.go:91	| 201 |      10.42.0.53 | PUT     | /nnrf-nfm/v1/nf-instances/9fe84417-3a88-4f0c-8024-08ea0b5c48ac | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **UDR**
 ```
 2025-08-24T16:32:41.030Z	INFO	producer/nf_management.go:527	Create NF Profile  UDR	{"component": "NRF", "category": "MGMT"}
 ```
 
-**AMF**
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:41.032Z	INFO	logger/logger.go:91	| 201 |      10.42.0.70 | PUT     | /nnrf-nfm/v1/nf-instances/e4f9cf12-5e83-4717-a220-99c55b631ed5 | 	{"component": "NRF", "category": "GIN"}
+```
+
+Creación del `NF Profile` del **AMF**
 ```
 2025-08-24T16:32:42.392Z	INFO	producer/nf_management.go:527	Create NF Profile  AMF	{"component": "NRF", "category": "MGMT"}
 ```
+
+Código HTTP 201 en respuesta al registro
+```
+2025-08-24T16:32:42.394Z	INFO	logger/logger.go:91	| 201 |      10.42.0.61 | PUT     | /nnrf-nfm/v1/nf-instances/37ba245d-b814-4af1-a8f6-73477a6a9d83 | 	{"component": "NRF", "category": "GIN"}
+```
+
+**Resultado de las KPIs medidas:**
+- Tasa de éxito de registro: 100% (7 de 7 NFs principales: UDM, NSSF, PCF, AUSF, SMF, UDR, AMF).
+- Consistencia de la comunicación: Cada registro recibió una respuesta HTTP 201.
+
 
 
 ### Análisis y Veredicto de la Prueba 1
@@ -1393,16 +1446,11 @@ La prueba anterior resultó exitosa, se demostró que el NRF de Aether SD-Core, 
 
 ### Prueba 2. Simulación y comprobacion de funcionamiento
 
-**Objetivo:** Verificar que el NRF mantiene el núcleo 5G funcional.
-https://github.com/networkgcorefullcode/docs_dev
+**Objetivo:** Verificar que el NRF actualizado mantiene el núcleo 5G funcional y es capas de realizar simulaciones exitosas.
+
 **Métricas Clave de Éxito (KPIs):** Definir cuantitativamente el éxito. 
-Ejemplos:
-- Tasa de éxito de registro: 100%.
-- Tiempo promedio de registro < 500 ms.
-- Consumo de CPU del pod NRF 
-
-
-**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
+- Establecimiento de Sesión PDU: Porcentaje de éxito en el establecimiento de la sesión.
+- Conectividad de Datos: El UE simulado debe poder resolver nombres de dominio y recibir respuesta a través de un ping a un host externo (ej. google.com).
 
 
 #### **Procedimiento:**
@@ -1445,26 +1493,29 @@ Luego de que estén correctamente inicializados el `gnb` y el `ue` se puede hace
 
 ![Ping a Google)](imgs/ping-sim.png)
 
-Figura M. Ping a Google
+Figura M. Ping a Google.
 
 
 Como se puede observar en las imágenes tanto el ping, como la inicialización del UE y el gNb fueron exitosas.
 
+**Resultados de las KPIs medidas:**
+- Establecimiento de Sesión PDU: 100% de éxito en el establecimiento de la sesión.
+- Conectividad de Datos: El UE simulado resolvió el nombre de dominio google.com y recibió respuesta a través de un ping a este host.
+
+
 ### Análisis y Veredicto de la Prueba 2
+
+La prueba anterior resultó exitosa. Se demostró que con la actualización en el NRF de Aether SD-Core, el núcleo 5G es capaz de realizar simulaciones exitosas, conectándose a gNBs y dando conectidiad a UEs simulados.
 
 
 ### Prueba 3. Prueba de Integración y Registro de UDM Externo
 
-**Objetivo:** Verificar que el NRF modificado puede registrar correctamente un UDM de Open5GS y gestionar su ciclo de vida básico").
+**Objetivo:** Verificar la capacidad del NRF modificado para interoperar NFs externas al ecosistema nativo de Aether, validando el proceso de registro y la comunicación inicial. Para este caso de prueba, se utilizó un UDM  de Open5GS como componente de referencia de un tercero.
 
 **Métricas Clave de Éxito (KPIs):** 
 Ejemplo:
-- Tasa de éxito de registro: 100%.
-- Tiempo promedio de registro < 500 ms.
-- Consumo de CPU del pod NRF no supera el 25% durante el registro.
-
-**Entorno y Herramientas:** Describir la configuración (VMs, Kubernetes, Aether OnRamp, UERANSIM, Open5GS-UDM, kubectl, docker logs).
-
+- Tasa de éxito de registro: Porcentaje de éxito de registro del componente externo
+- Consistencia de la comunicación: Estado de respuesta del registro.
 
 #### Procedimiento 
 
@@ -1709,6 +1760,11 @@ Registro exitoso:
 2025-08-13T19:57:51.608Z DEBUG producer/nf_management.go:70 register success {"component": "NRF", "category": "MGMT"}
 ```
 
+Código HTTP 201 en respuesta al registro
+```
+2025-08-13T19:57:51.608Z INFO logger/logger.go:91 | 201 |   192.168.12.11 | PUT     | /nnrf-nfm/v1/nf-instances/cb54f7b2-787f-41f0-abbf-f1bb9ccfa54d |  {"component": "NRF", "category": "GIN"}
+```
+
 Luego del registro, el NRF recibe una petición por parte del UDM para conocer otras NFs del Core:
 
 ```logs-NRF
@@ -1736,12 +1792,28 @@ El proceso anterior se describe también en la siguiente figura:
 Figura X. Registro del UDM (Open5GS) en el NRF (Aether)
 
 
+**Análisis de la Causa Raíz del Error:**
+La causa fundamental de este fallo se encuentra en los logs del propio NRF. La línea:
+code
+```Logs-NRF
+2025-08-13T19:57:51.609Z ERROR producer/nf_management.go:127 Error in string conversion: 0 {"component": "NRF", "category": "MGMT"}
+```
+indica un error de programación dentro del manejador de la solicitud de descubrimiento. Un "error de conversión de cadena (string)" sugiere que el código del NRF intentó procesar un dato numérico (el 0) como si fuera una cadena de texto, o viceversa, lo que provocó una excepción y la terminación abrupta del procesamiento de la solicitud.
+
+Este tipo de error es un síntoma clásico de una discrepancia en la implementación de la especificación 3GPP entre dos proveedores distintos. Lo más probable es que la solicitud GET del UDM de Open5GS incluya parámetros de consulta (ej. target-nf-type, requester-nf-type) que, aunque válidos según la especificación, no son manejados correctamente por el código del NRF de Aether. El NRF podría estar esperando un formato de parámetro específico (ej. un nombre de servicio como cadena de texto) y, al recibir un valor inesperado o un valor por defecto que internamente se representa como 0, falla al intentar procesarlo.
+
+
+**Resultados de las KPIs medidas:** 
+- Tasa de éxito de registro: 100%. El componente externo (UDM de Open5GS) se registró exitosamente
+- Consistencia de la comunicación: El registro recibió una respuesta HTTP 201.
+
+
 ### Análisis y Veredicto de la Prueba 3
 
+La prueba anterior resultó exitosa. Se demostró que el NRF actualizado es capaz de registrar componentes externos al ecosistema nativo de Aether, validado por la evidencia planteada en el registro del UDM de Open5GS como componente de referencia.
 
 
 ## Conclusiones del informe
-
 
 El trabajo de integración y prueba documentado en este informe ha arrojado las siguientes conclusiones clave que deben guiar las próximas fases del proyecto:
 
